@@ -1,0 +1,45 @@
+.logo-loader-container {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0a0a0b; /* Dark background for better glow visibility */
+  z-index: 9999;
+}
+
+.logo-loader-svg {
+  overflow: visible;
+  filter: drop-shadow(0 0 15px hsl(var(--primary)));
+}
+
+.logo-path {
+  stroke: hsl(var(--primary));
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke-width: 1.5;
+  animation: trace 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes trace {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+.circle-outer { animation-delay: 0s; }
+.circle-inner { animation-delay: 0.1s; }
+.phi-symbol { animation-delay: 0.2s; }
+.phi-left, .phi-right { animation-delay: 0.3s; }
