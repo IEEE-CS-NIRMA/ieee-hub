@@ -1,14 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.05, duration: 0.5 },
-  }),
-};
+import { fadeUp, staggerContainer, lineReveal, badgePop, scaleIn } from "@/lib/animations";
+import AnimatedText from "@/components/AnimatedText";
 
 type EventCategory = "all" | "workshop" | "competition" | "talk" | "hackathon";
 
@@ -48,23 +41,31 @@ const categoryColors: Record<string, string> = {
 
 const Events = () => {
   const [activeFilter, setActiveFilter] = useState<EventCategory>("all");
-
   const filtered = activeFilter === "all" ? events : events.filter((e) => e.category === activeFilter);
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground">
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground overflow-hidden">
         <div className="container mx-auto">
-          <motion.div initial="hidden" animate="visible">
-            <motion.div variants={fadeUp} custom={0} className="inline-block brutal-border bg-primary px-4 py-2 mb-6">
+          <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
+            <motion.div variants={badgePop} custom={0} className="inline-block brutal-border bg-primary px-4 py-2 mb-6">
               <span className="font-heading font-extrabold text-primary-foreground text-sm uppercase tracking-widest">
                 Events
               </span>
             </motion.div>
-            <motion.h1 variants={fadeUp} custom={1} className="text-5xl md:text-7xl font-heading font-extrabold leading-[0.9] mb-6">
-              Our <span className="text-primary">Events</span>
-            </motion.h1>
+
+            <div className="overflow-hidden">
+              <AnimatedText
+                text="Our Events"
+                el="h1"
+                className="text-5xl md:text-7xl font-heading font-extrabold leading-[0.9] mb-4"
+                delay={0.1}
+              />
+            </div>
+
+            <motion.div className="line-accent w-20 mb-6 mt-2" variants={lineReveal} custom={0} />
+
             <motion.p variants={fadeUp} custom={2} className="text-xl font-body text-muted-foreground max-w-2xl">
               From hackathons to workshops, we've got something for every tech enthusiast.
             </motion.p>
@@ -72,48 +73,69 @@ const Events = () => {
         </div>
       </section>
 
-      {/* Filters + Events */}
+      {/* ── Filters + Grid ───────────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           {/* Filters */}
-          <div className="flex flex-wrap gap-3 mb-12">
-            {filters.map((filter) => (
-              <button
+          <motion.div
+            className="flex flex-wrap gap-3 mb-12"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            {filters.map((filter, i) => (
+              <motion.button
                 key={filter.value}
+                variants={fadeUp}
+                custom={i}
                 onClick={() => setActiveFilter(filter.value)}
                 className={`brutal-border px-5 py-3 font-heading font-bold text-sm uppercase tracking-wide transition-all
                   hover:brutal-shadow-sm hover:-translate-y-0.5
                   ${activeFilter === filter.value ? "bg-foreground text-background brutal-shadow-sm" : "bg-background text-foreground"}`}
+                whileTap={{ scale: 0.96 }}
               >
                 {filter.label}
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
 
-          {/* Grid */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filtered.map((event, i) => (
-              <motion.div
-                key={event.title}
-                variants={fadeUp}
-                custom={i}
-                className="brutal-card hover:brutal-shadow-hover hover:-translate-y-1 transition-all flex flex-col"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={`brutal-border px-3 py-1 font-heading font-bold text-xs uppercase ${categoryColors[event.category]}`}>
-                    {event.category}
-                  </span>
-                </div>
-                <h3 className="text-xl font-heading font-extrabold mb-2">{event.title}</h3>
-                <p className="font-heading font-semibold text-sm text-primary mb-2">{event.date}</p>
-                <p className="font-body text-muted-foreground mb-6 flex-1">{event.desc}</p>
-                <button className="brutal-btn-primary text-sm w-full">Register →</button>
-              </motion.div>
-            ))}
+          {/* Grid with AnimatePresence for filter transitions */}
+          <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((event, i) => (
+                <motion.div
+                  key={event.title}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, y: -10 }}
+                  transition={{ delay: i * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="brutal-card flex flex-col"
+                  whileHover={{ y: -6, boxShadow: "var(--shadow-brutal-hover)", transition: { type: "spring", stiffness: 150 } }}
+                >
+                  <motion.div
+                    className="flex items-center gap-3 mb-4"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 + 0.15 }}
+                  >
+                    <span className={`brutal-border px-3 py-1 font-heading font-bold text-xs uppercase ${categoryColors[event.category]}`}>
+                      {event.category}
+                    </span>
+                  </motion.div>
+                  <h3 className="text-xl font-heading font-extrabold mb-2">{event.title}</h3>
+                  <p className="font-heading font-semibold text-sm text-primary mb-2">{event.date}</p>
+                  <p className="font-body text-muted-foreground mb-6 flex-1">{event.desc}</p>
+                  <motion.button
+                    className="brutal-btn-primary text-sm w-full"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Register →
+                  </motion.button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </motion.div>
         </div>
       </section>

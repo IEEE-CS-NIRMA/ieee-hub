@@ -1,14 +1,7 @@
 import { motion } from "framer-motion";
 import { Linkedin } from "lucide-react";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.5 },
-  }),
-};
+import { fadeUp, staggerContainer, lineReveal, badgePop, scaleIn } from "@/lib/animations";
+import AnimatedText from "@/components/AnimatedText";
 
 const members = [
   {
@@ -52,18 +45,25 @@ const members = [
 const BoardMembers = () => {
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground">
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground overflow-hidden">
         <div className="container mx-auto">
-          <motion.div initial="hidden" animate="visible">
-            <motion.div variants={fadeUp} custom={0} className="inline-block brutal-border bg-foreground text-background px-4 py-2 mb-6">
-              <span className="font-heading font-extrabold text-sm uppercase tracking-widest">
-                Team
-              </span>
+          <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
+            <motion.div variants={badgePop} custom={0} className="inline-block brutal-border bg-foreground text-background px-4 py-2 mb-6">
+              <span className="font-heading font-extrabold text-sm uppercase tracking-widest">Team</span>
             </motion.div>
-            <motion.h1 variants={fadeUp} custom={1} className="text-5xl md:text-7xl font-heading font-extrabold leading-[0.9] mb-6">
-              Board <span className="text-primary">Members</span>
-            </motion.h1>
+
+            <div className="overflow-hidden">
+              <AnimatedText
+                text="Board Members"
+                el="h1"
+                className="text-5xl md:text-7xl font-heading font-extrabold leading-[0.9] mb-4"
+                delay={0.1}
+              />
+            </div>
+
+            <motion.div className="line-accent w-20 mb-6 mt-2" variants={lineReveal} custom={0} />
+
             <motion.p variants={fadeUp} custom={2} className="text-xl font-body text-muted-foreground max-w-2xl">
               Meet the passionate leaders driving IEEE Computer Society at Nirma University.
             </motion.p>
@@ -71,45 +71,69 @@ const BoardMembers = () => {
         </div>
       </section>
 
-      {/* Grid */}
+      {/* ── Grid ─────────────────────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.1 }}
+            variants={staggerContainer}
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {members.map((member, i) => (
               <motion.div
                 key={member.name}
-                variants={fadeUp}
+                variants={scaleIn}
                 custom={i}
-                className="brutal-card hover:brutal-shadow-hover hover:-translate-y-1 transition-all"
+                className="brutal-card overflow-hidden group"
+                whileHover={{ y: -6, boxShadow: "var(--shadow-brutal-hover)", transition: { type: "spring", stiffness: 150 } }}
               >
-                {/* Avatar placeholder */}
-                <div className={`w-full h-48 brutal-border mb-6 flex items-center justify-center ${member.color}`}>
-                  <span className="text-6xl font-heading font-extrabold opacity-50">
+                {/* Avatar with overlay reveal effect */}
+                <div className={`w-full h-48 brutal-border mb-6 flex items-center justify-center relative overflow-hidden ${member.color}`}>
+                  <motion.div
+                    className="absolute inset-0 bg-primary"
+                    initial={{ scaleY: 1, originY: 0 }}
+                    whileInView={{ scaleY: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08 + 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                  <motion.span
+                    className="text-6xl font-heading font-extrabold opacity-50 relative z-10"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 0.5 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.08 + 0.45, type: "spring", stiffness: 150 }}
+                  >
                     {member.name.split(" ").map(n => n[0]).join("")}
-                  </span>
+                  </motion.span>
                 </div>
 
-                <div className="inline-block brutal-border bg-primary px-3 py-1 mb-3">
+                {/* Position badge */}
+                <motion.div
+                  className="inline-block brutal-border bg-primary px-3 py-1 mb-3"
+                  initial={{ opacity: 0, x: -15 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 + 0.5, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
                   <span className="font-heading font-bold text-primary-foreground text-xs uppercase">
                     {member.position}
                   </span>
-                </div>
+                </motion.div>
 
                 <h3 className="text-xl font-heading font-extrabold mb-2">{member.name}</h3>
                 <p className="font-body text-muted-foreground mb-4">{member.bio}</p>
 
-                <a
+                <motion.a
                   href="#"
                   className="brutal-border inline-flex items-center gap-2 px-4 py-2 bg-background text-foreground font-heading font-bold text-sm
                     hover:bg-foreground hover:text-background transition-all"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   <Linkedin size={16} /> LinkedIn
-                </a>
+                </motion.a>
               </motion.div>
             ))}
           </motion.div>

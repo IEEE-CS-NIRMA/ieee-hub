@@ -163,4 +163,53 @@
     @apply brutal-btn bg-background text-foreground
            hover:bg-foreground hover:text-background;
   }
+
+  /* ── Premium scroll & transition helpers ───────────────────── */
+
+  /* Smooth page scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* All interactive elements transition smoothly */
+  a, button, input, textarea, select {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Horizontal rule line that can be animated via Framer Motion scaleX */
+  .line-accent {
+    @apply h-[3px] bg-primary origin-left;
+  }
+
+  /* Subtle animated underline for inline text emphasis */
+  .fancy-link {
+    @apply relative inline-block after:absolute after:bottom-0 after:left-0
+           after:w-full after:h-[2px] after:bg-primary after:origin-left
+           after:scale-x-0 after:transition-transform after:duration-300
+           after:ease-[cubic-bezier(0.16,1,0.3,1)]
+           hover:after:scale-x-100;
+  }
+
+  /* Number counter text animation glow on entrance */
+  .stat-value {
+    @apply font-heading font-extrabold;
+    text-shadow: 0 0 30px rgba(var(--primary-raw, 255 168 0) / 0.3);
+  }
+
+  /* Noise grain overlay for premium texture */
+  .noise-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.035;
+  }
+
+  /* Section entrance — applied to all major sections */
+  .section-enter {
+    @apply relative;
+  }
 }
+
