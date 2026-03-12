@@ -2,6 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "./ThemeProvider";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { useState } from "react";
+import logoBlack from "@/assets/ieee-cs-logo-black.png";
+import logoWhite from "@/assets/ieee-cs-logo-white.png";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -16,17 +18,14 @@ const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const logo = theme === "dark" ? logoWhite : logoBlack;
+
   return (
     <nav className="sticky top-0 z-50 bg-background brutal-border border-t-0 border-x-0 border-b-[3px]">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="brutal-border bg-primary p-2 transition-all group-hover:brutal-shadow-sm">
-            <span className="font-heading font-extrabold text-primary-foreground text-sm">IEEE CS</span>
-          </div>
-          <span className="font-heading font-bold text-sm hidden sm:block">
-            Nirma University
-          </span>
+        <Link to="/" className="flex items-center gap-3 group shrink-0">
+          <img src={logo} alt="IEEE Computer Society" className="h-8 md:h-10 w-auto" />
         </Link>
 
         {/* Desktop Nav */}
@@ -43,7 +42,6 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
             className="brutal-border p-2 ml-2 bg-primary text-primary-foreground transition-all hover:brutal-shadow-sm hover:scale-105"
@@ -72,7 +70,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="lg:hidden border-t-[3px] border-foreground bg-background">
           {navLinks.map((link) => (
