@@ -202,7 +202,7 @@ const Index = () => {
       </section>
 
       {/* Stats */}
-      <section className="py-20 px-4 bg-foreground text-background border-t-[3px] border-foreground">
+      <section data-cursor-invert className="py-20 px-4 bg-foreground text-background border-t-[3px] border-foreground">
         <div className="container mx-auto">
           <motion.div
             initial="hidden"

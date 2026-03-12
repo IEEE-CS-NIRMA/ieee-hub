@@ -86,7 +86,7 @@ const About = () => {
       </section>
 
       {/* Values */}
-      <section className="py-20 px-4 bg-foreground text-background border-t-[3px] border-foreground">
+      <section data-cursor-invert className="py-20 px-4 bg-foreground text-background border-t-[3px] border-foreground">
         <div className="container mx-auto">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }}>
             <motion.h2 variants={fadeUp} custom={0} className="text-4xl md:text-5xl font-heading font-extrabold mb-12">
