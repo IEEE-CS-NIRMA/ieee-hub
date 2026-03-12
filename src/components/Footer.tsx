@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logoWhite from "@/assets/ieee-cs-logo-white.png";
 
 const Footer = () => {
   return (
@@ -7,9 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <div className="inline-block border-[3px] border-background bg-primary p-3 mb-4">
-              <span className="font-heading font-extrabold text-primary-foreground text-lg">IEEE CS</span>
-            </div>
+            <img src={logoWhite} alt="IEEE Computer Society" className="h-10 w-auto mb-4" />
             <p className="font-body text-sm opacity-80 mt-2">
               IEEE Computer Society Student Chapter<br />
               Nirma University, Ahmedabad
@@ -41,7 +40,7 @@ const Footer = () => {
           {/* Social */}
           <div>
             <h3 className="font-heading font-extrabold text-lg mb-4 uppercase">Connect</h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               {["LinkedIn", "Instagram", "Twitter", "GitHub"].map((platform) => (
                 <a
                   key={platform}
