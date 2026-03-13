@@ -12,27 +12,37 @@ import Footer from "@/components/Footer";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Events from "./pages/Events";
+import Gallery from "./pages/Gallery";
 import BoardMembers from "./pages/BoardMembers";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+const TRACE_DURATION_MS = 1900;
+const REVEAL_DURATION_MS = 2000;
+const REVEAL_UNMOUNT_BUFFER_MS = 0;
 
 const App = () => {
-  const [loading, setLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(true);
+  const [loaderPhase, setLoaderPhase] = useState<"tracing" | "revealing">(
+    "tracing",
+  );
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <ThemeProvider>
-        <LogoLoader />
-      </ThemeProvider>
+    const revealTimer = setTimeout(
+      () => setLoaderPhase("revealing"),
+      TRACE_DURATION_MS,
     );
-  }
+    const hideTimer = setTimeout(
+      () => setShowLoader(false),
+      TRACE_DURATION_MS + REVEAL_DURATION_MS + REVEAL_UNMOUNT_BUFFER_MS,
+    );
+
+    return () => {
+      clearTimeout(revealTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -49,6 +59,7 @@ const App = () => {
                   <Route path="/" element={<Index />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/events" element={<Events />} />
+                  <Route path="/Gallery" element={<Gallery />} />
                   <Route path="/board" element={<BoardMembers />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="*" element={<NotFound />} />
@@ -57,6 +68,7 @@ const App = () => {
               <Footer />
             </div>
           </BrowserRouter>
+          {showLoader && <LogoLoader phase={loaderPhase} />}
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

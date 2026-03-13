@@ -11,6 +11,7 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/events", label: "Events" },
+  { to: "/Gallery", label: "Gallery" },
   { to: "/board", label: "Board Members" },
   { to: "/contact", label: "Contact" },
 ];
@@ -29,7 +30,12 @@ const Navbar = () => {
     <motion.nav
       ref={navRef}
       className="sticky top-0 z-50 bg-background brutal-border border-t-0 border-x-0 border-b-[3px]"
-      style={{ boxShadow: useTransform(navShadow, (v) => `0 4px ${Math.round(v * 24)}px rgba(0,0,0,${v * 0.08})`) }}
+      style={{
+        boxShadow: useTransform(
+          navShadow,
+          (v) => `0 4px ${Math.round(v * 24)}px rgba(0,0,0,${v * 0.08})`,
+        ),
+      }}
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
@@ -102,7 +108,11 @@ const Navbar = () => {
       {/* Mobile menu */}
       <motion.div
         initial={false}
-        animate={mobileOpen ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
+        animate={
+          mobileOpen
+            ? { height: "auto", opacity: 1 }
+            : { height: 0, opacity: 0 }
+        }
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         className="lg:hidden overflow-hidden"
       >
@@ -111,8 +121,14 @@ const Navbar = () => {
             <motion.div
               key={link.to}
               initial={{ x: -20, opacity: 0 }}
-              animate={mobileOpen ? { x: 0, opacity: 1 } : { x: -20, opacity: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              animate={
+                mobileOpen ? { x: 0, opacity: 1 } : { x: -20, opacity: 0 }
+              }
+              transition={{
+                delay: i * 0.05,
+                duration: 0.3,
+                ease: [0.16, 1, 0.3, 1],
+              }}
             >
               <Link
                 to={link.to}
