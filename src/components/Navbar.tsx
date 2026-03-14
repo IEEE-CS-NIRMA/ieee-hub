@@ -3,8 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "./ThemeProvider";
 import { Sun, Moon, Menu, X } from "lucide-react";
 import { useState, useRef } from "react";
-import logoBlack from "@/assets/ieee-cs-logo-black.png";
-import logoWhite from "@/assets/ieee-cs-logo-white.png";
+import logoBlack from "@/assets/IEEE_CS_Nirma_logo_full_black.svg";
+import logoWhite from "@/assets/IEEE_CS_Nirma_logo_full_white.svg";
 import { staggerContainer, fadeIn } from "@/lib/animations";
 
 const navLinks = [

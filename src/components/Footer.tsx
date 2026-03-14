@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Linkedin, Twitter, Github, Instagram } from "lucide-react";
-import logoWhite from "@/assets/ieee-cs-logo-white.png";
+import { Linkedin, Github, Instagram } from "lucide-react";
+import { SiDiscord } from "react-icons/si";
+import logoWhite from "@/assets/IEEE_CS_Nirma_logo_full_white.svg";
 
 const socialLinks = [
   { label: "LinkedIn", icon: Linkedin, href: "#" },
@@ -9,7 +10,7 @@ const socialLinks = [
     icon: Instagram,
     href: "https://www.instagram.com/ieee.cs.sbnu?igsh=MW5rOXJ0cmFhYjhocg==",
   },
-  { label: "Twitter", icon: Twitter, href: "#" },
+  { label: "Discord", icon: SiDiscord, href: "#" },
   { label: "GitHub", icon: Github, href: "#" },
 ];
 

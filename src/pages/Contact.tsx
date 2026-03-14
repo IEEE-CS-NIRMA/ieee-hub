@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Mail, MapPin, Linkedin, Twitter, Github } from "lucide-react";
+import { Mail, MapPin, Linkedin, Github } from "lucide-react";
+import { SiDiscord } from "react-icons/si";
 import { useState } from "react";
 import {
   fadeUp,
@@ -13,7 +14,7 @@ import AnimatedText from "@/components/AnimatedText";
 
 const socialLinks = [
   { label: "LinkedIn", icon: Linkedin },
-  { label: "Twitter", icon: Twitter },
+  { label: "Discord", icon: SiDiscord },
   { label: "GitHub", icon: Github },
 ];
 
