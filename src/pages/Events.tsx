@@ -1,89 +1,22 @@
-import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   fadeUp,
   staggerContainer,
   lineReveal,
   badgePop,
-  scaleIn,
 } from "@/lib/animations";
 import AnimatedText from "@/components/AnimatedText";
+import {
+  eventFilters,
+  fallbackEvents,
+  fetchPublishedEvents,
+  type EventCategory,
+  type EventFilter,
+} from "@/lib/content/events";
 
-type EventCategory = "all" | "workshop" | "competition" | "talk" | "hackathon";
-
-interface EventItem {
-  title: string;
-  date: string;
-  desc: string;
-  category: EventCategory;
-}
-
-const events: EventItem[] = [
-  {
-    title: "HackNirma 2025",
-    date: "April 15, 2025",
-    desc: "24-hour hackathon with prizes worth ₹1,00,000. Build innovative solutions.",
-    category: "hackathon",
-  },
-  {
-    title: "AI/ML Workshop",
-    date: "April 22, 2025",
-    desc: "Hands-on workshop on building machine learning models from scratch.",
-    category: "workshop",
-  },
-  {
-    title: "Tech Talk: Web3 & Blockchain",
-    date: "May 5, 2025",
-    desc: "Industry expert discusses the future of decentralized web.",
-    category: "talk",
-  },
-  {
-    title: "Competitive Programming Contest",
-    date: "May 12, 2025",
-    desc: "Test your algorithmic skills in this intense coding contest.",
-    category: "competition",
-  },
-  {
-    title: "Cloud Computing Bootcamp",
-    date: "May 20, 2025",
-    desc: "3-day bootcamp on AWS, GCP, and Azure fundamentals.",
-    category: "workshop",
-  },
-  {
-    title: "Cybersecurity CTF",
-    date: "June 1, 2025",
-    desc: "Capture The Flag competition for aspiring security professionals.",
-    category: "competition",
-  },
-  {
-    title: "Speaker Session: Open Source",
-    date: "June 10, 2025",
-    desc: "Learn how to contribute to open source and build your portfolio.",
-    category: "talk",
-  },
-  {
-    title: "Full Stack Web Dev Workshop",
-    date: "June 18, 2025",
-    desc: "Build a complete web application from frontend to backend.",
-    category: "workshop",
-  },
-  {
-    title: "CodeSprint 3.0",
-    date: "July 5, 2025",
-    desc: "Speed coding competition with real-world problem statements.",
-    category: "hackathon",
-  },
-];
-
-const filters: { label: string; value: EventCategory }[] = [
-  { label: "All Events", value: "all" },
-  { label: "Workshops", value: "workshop" },
-  { label: "Competitions", value: "competition" },
-  { label: "Talks", value: "talk" },
-  { label: "Hackathons", value: "hackathon" },
-];
-
-const categoryColors: Record<string, string> = {
+const categoryColors: Record<EventCategory, string> = {
   workshop: "bg-secondary text-secondary-foreground",
   competition: "bg-primary text-primary-foreground",
   talk: "bg-foreground text-background",
@@ -118,7 +51,17 @@ const eventMetaVariants = {
 };
 
 const Events = () => {
-  const [activeFilter, setActiveFilter] = useState<EventCategory>("all");
+  const [activeFilter, setActiveFilter] = useState<EventFilter>("all");
+  const { data, isLoading } = useQuery({
+    queryKey: ["events"],
+    queryFn: fetchPublishedEvents,
+    placeholderData: {
+      items: fallbackEvents,
+      source: "fallback" as const,
+    },
+  });
+
+  const events = data?.items ?? fallbackEvents;
   const filtered =
     activeFilter === "all"
       ? events
@@ -174,6 +117,12 @@ const Events = () => {
       {/* ── Filters + Grid ───────────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
+          {!isLoading && data?.source === "fallback" && (
+            <div className="brutal-border bg-secondary text-secondary-foreground px-4 py-3 mb-8 font-heading font-bold text-xs uppercase tracking-wide inline-flex">
+              Demo data active. Connect Supabase to manage events dynamically.
+            </div>
+          )}
+
           {/* Filters */}
           <motion.div
             className="flex flex-wrap gap-3 mb-12"
@@ -181,7 +130,7 @@ const Events = () => {
             animate="visible"
             variants={staggerContainer}
           >
-            {filters.map((filter, i) => (
+            {eventFilters.map((filter, i) => (
               <motion.button
                 key={filter.value}
                 variants={fadeUp}
@@ -202,10 +151,22 @@ const Events = () => {
             layout
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
+            {isLoading && filtered.length === 0 && (
+              <div className="md:col-span-2 lg:col-span-3 font-heading font-bold uppercase tracking-wide text-sm text-muted-foreground">
+                Loading events...
+              </div>
+            )}
+
+            {!isLoading && filtered.length === 0 && (
+              <div className="md:col-span-2 lg:col-span-3 brutal-border p-6 font-body text-muted-foreground">
+                No events found for this category yet.
+              </div>
+            )}
+
             <AnimatePresence mode="popLayout">
               {filtered.map((event, i) => (
                 <motion.div
-                  key={event.title}
+                  key={event.id}
                   layout
                   custom={i}
                   variants={eventCardVariants}
@@ -243,13 +204,26 @@ const Events = () => {
                   <p className="font-body text-muted-foreground mb-6 flex-1">
                     {event.desc}
                   </p>
-                  <motion.button
-                    className="brutal-btn-primary text-sm w-full"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Register →
-                  </motion.button>
+                  {event.registrationLink ? (
+                    <motion.a
+                      href={event.registrationLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="brutal-btn-primary text-sm w-full text-center"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Register →
+                    </motion.a>
+                  ) : (
+                    <motion.button
+                      type="button"
+                      disabled
+                      className="brutal-border bg-background text-muted-foreground cursor-not-allowed px-6 py-4 font-heading font-bold uppercase tracking-wide text-sm w-full"
+                    >
+                      Registration Soon
+                    </motion.button>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

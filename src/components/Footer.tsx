@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom";
+import { Linkedin, Twitter, Github, Instagram } from "lucide-react";
 import logoWhite from "@/assets/ieee-cs-logo-white.png";
+
+const socialLinks = [
+  { label: "LinkedIn", icon: Linkedin },
+  { label: "Instagram", icon: Instagram },
+  { label: "Twitter", icon: Twitter },
+  { label: "GitHub", icon: Github },
+];
 
 const Footer = () => {
   return (
@@ -8,16 +16,23 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <img src={logoWhite} alt="IEEE Computer Society" className="h-10 w-auto mb-4" />
+            <img
+              src={logoWhite}
+              alt="IEEE Computer Society"
+              className="h-10 w-auto mb-4"
+            />
             <p className="font-body text-sm opacity-80 mt-2">
-              IEEE Computer Society Student Chapter<br />
+              IEEE Computer Society Student Chapter
+              <br />
               Nirma University, Ahmedabad
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-heading font-extrabold text-lg mb-4 uppercase">Quick Links</h3>
+            <h3 className="font-heading font-extrabold text-lg mb-4 uppercase">
+              Quick Links
+            </h3>
             <div className="flex flex-col gap-2">
               {[
                 { to: "/", label: "Home" },
@@ -39,16 +54,19 @@ const Footer = () => {
 
           {/* Social */}
           <div>
-            <h3 className="font-heading font-extrabold text-lg mb-4 uppercase">Connect</h3>
+            <h3 className="font-heading font-extrabold text-lg mb-4 uppercase">
+              Connect
+            </h3>
             <div className="flex gap-3 flex-wrap">
-              {["LinkedIn", "Instagram", "Twitter", "GitHub"].map((platform) => (
+              {socialLinks.map((platform) => (
                 <a
-                  key={platform}
+                  key={platform.label}
                   href="#"
-                  className="border-[3px] border-background px-3 py-2 font-heading font-bold text-xs uppercase
+                  className="border-[3px] border-background px-3 py-2 font-heading font-bold text-xs uppercase inline-flex items-center gap-2
                     hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
                 >
-                  {platform}
+                  <platform.icon size={14} />
+                  {platform.label}
                 </a>
               ))}
             </div>
@@ -57,7 +75,8 @@ const Footer = () => {
 
         <div className="border-t-[3px] border-background mt-8 pt-6 text-center">
           <p className="font-body text-sm opacity-70">
-            © {new Date().getFullYear()} IEEE Computer Society Nirma University. All rights reserved.
+            © {new Date().getFullYear()} IEEE Computer Society Nirma University.
+            All rights reserved.
           </p>
         </div>
       </div>
