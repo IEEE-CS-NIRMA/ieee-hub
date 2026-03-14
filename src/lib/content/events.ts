@@ -7,6 +7,8 @@ export type EventCategory =
   | "talk"
   | "hackathon";
 
+export type EventRegistrationMode = "external" | "internal";
+
 export type EventFilter = "all" | EventCategory;
 
 export interface EventItem {
@@ -15,6 +17,8 @@ export interface EventItem {
   date: string;
   desc: string;
   category: EventCategory;
+  registrationMode: EventRegistrationMode;
+  posterLink?: string | null;
   registrationLink?: string | null;
 }
 
@@ -24,6 +28,8 @@ interface EventRow {
   description: string;
   category: EventCategory;
   event_date: string | null;
+  poster_url: string | null;
+  registration_mode: EventRegistrationMode;
   registration_link: string | null;
 }
 
@@ -47,6 +53,8 @@ export const fallbackEvents: EventItem[] = [
     date: "April 15, 2025",
     desc: "24-hour hackathon with prizes worth ₹1,00,000. Build innovative solutions.",
     category: "hackathon",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -55,6 +63,8 @@ export const fallbackEvents: EventItem[] = [
     date: "April 22, 2025",
     desc: "Hands-on workshop on building machine learning models from scratch.",
     category: "workshop",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -63,6 +73,8 @@ export const fallbackEvents: EventItem[] = [
     date: "May 5, 2025",
     desc: "Industry expert discusses the future of decentralized web.",
     category: "talk",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -71,6 +83,8 @@ export const fallbackEvents: EventItem[] = [
     date: "May 12, 2025",
     desc: "Test your algorithmic skills in this intense coding contest.",
     category: "competition",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -79,6 +93,8 @@ export const fallbackEvents: EventItem[] = [
     date: "May 20, 2025",
     desc: "3-day bootcamp on AWS, GCP, and Azure fundamentals.",
     category: "workshop",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -87,6 +103,8 @@ export const fallbackEvents: EventItem[] = [
     date: "June 1, 2025",
     desc: "Capture The Flag competition for aspiring security professionals.",
     category: "competition",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -95,6 +113,8 @@ export const fallbackEvents: EventItem[] = [
     date: "June 10, 2025",
     desc: "Learn how to contribute to open source and build your portfolio.",
     category: "talk",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -103,6 +123,8 @@ export const fallbackEvents: EventItem[] = [
     date: "June 18, 2025",
     desc: "Build a complete web application from frontend to backend.",
     category: "workshop",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
   {
@@ -111,6 +133,8 @@ export const fallbackEvents: EventItem[] = [
     date: "July 5, 2025",
     desc: "Speed coding competition with real-world problem statements.",
     category: "hackathon",
+    registrationMode: "external",
+    posterLink: null,
     registrationLink: null,
   },
 ];
@@ -136,6 +160,8 @@ function mapEventRow(row: EventRow): EventItem {
     date: formatEventDate(row.event_date),
     desc: row.description,
     category: row.category,
+    registrationMode: row.registration_mode,
+    posterLink: row.poster_url,
     registrationLink: row.registration_link,
   };
 }
@@ -147,7 +173,7 @@ export async function fetchPublishedEvents(): Promise<EventsQueryResult> {
 
   const { data, error } = await supabase
     .from("events")
-    .select("id, title, description, category, event_date, registration_link")
+    .select("id, title, description, category, event_date, poster_url, registration_mode, registration_link")
     .eq("is_published", true)
     .order("event_date", { ascending: true })
     .order("sort_order", { ascending: true });

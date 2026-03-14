@@ -3,10 +3,14 @@ import { Linkedin, Twitter, Github, Instagram } from "lucide-react";
 import logoWhite from "@/assets/ieee-cs-logo-white.png";
 
 const socialLinks = [
-  { label: "LinkedIn", icon: Linkedin },
-  { label: "Instagram", icon: Instagram },
-  { label: "Twitter", icon: Twitter },
-  { label: "GitHub", icon: Github },
+  { label: "LinkedIn", icon: Linkedin, href: "#" },
+  {
+    label: "Instagram",
+    icon: Instagram,
+    href: "https://www.instagram.com/ieee.cs.sbnu?igsh=MW5rOXJ0cmFhYjhocg==",
+  },
+  { label: "Twitter", icon: Twitter, href: "#" },
+  { label: "GitHub", icon: Github, href: "#" },
 ];
 
 const Footer = () => {
@@ -61,7 +65,13 @@ const Footer = () => {
               {socialLinks.map((platform) => (
                 <a
                   key={platform.label}
-                  href="#"
+                  href={platform.href}
+                  target={
+                    platform.href.startsWith("http") ? "_blank" : undefined
+                  }
+                  rel={
+                    platform.href.startsWith("http") ? "noreferrer" : undefined
+                  }
                   className="border-[3px] border-background px-3 py-2 font-heading font-bold text-xs uppercase inline-flex items-center gap-2
                     hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
                 >

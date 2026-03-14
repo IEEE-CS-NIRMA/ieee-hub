@@ -6,12 +6,25 @@ create table if not exists public.events (
   description text not null,
   category text not null check (category in ('workshop', 'competition', 'talk', 'hackathon')),
   event_date timestamptz not null,
+  poster_url text,
+  registration_mode text not null default 'external' check (registration_mode in ('external', 'internal')),
   registration_link text,
   is_published boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.events add column if not exists poster_url text;
+alter table public.events add column if not exists registration_mode text;
+update public.events set registration_mode = 'external' where registration_mode is null;
+alter table public.events alter column registration_mode set default 'external';
+alter table public.events alter column registration_mode set not null;
+
+alter table public.events drop constraint if exists events_registration_mode_check;
+alter table public.events
+add constraint events_registration_mode_check
+check (registration_mode in ('external', 'internal'));
 
 create index if not exists events_event_date_idx on public.events (event_date);
 create index if not exists events_published_sort_idx on public.events (is_published, sort_order, event_date);
@@ -38,6 +51,8 @@ insert into public.events (
   description,
   category,
   event_date,
+  poster_url,
+  registration_mode,
   registration_link,
   is_published,
   sort_order
@@ -49,6 +64,8 @@ values
     'hackathon',
     '2025-04-15T09:00:00+05:30',
     null,
+    'external',
+    null,
     true,
     1
   ),
@@ -57,6 +74,8 @@ values
     'Hands-on workshop on building machine learning models from scratch.',
     'workshop',
     '2025-04-22T10:00:00+05:30',
+    null,
+    'external',
     null,
     true,
     2
@@ -67,10 +86,43 @@ values
     'talk',
     '2025-05-05T17:00:00+05:30',
     null,
+    'external',
+    null,
     true,
     3
   )
 on conflict do nothing;
+
+create table if not exists public.event_registrations (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  full_name text not null,
+  email text not null,
+  phone text,
+  college text,
+  year text,
+  branch text,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists event_registrations_event_idx on public.event_registrations (event_id, created_at desc);
+create unique index if not exists event_registrations_unique_event_email_idx on public.event_registrations (event_id, lower(email));
+
+alter table public.event_registrations enable row level security;
+
+drop policy if exists "Anyone can submit event registration" on public.event_registrations;
+create policy "Anyone can submit event registration"
+on public.event_registrations
+for insert
+to anon, authenticated
+with check (true);
+
+drop policy if exists "Authenticated users can view event registrations" on public.event_registrations;
+create policy "Authenticated users can view event registrations"
+on public.event_registrations
+for select
+to authenticated
+using (true);
 
 create table if not exists public.board_members (
   id uuid primary key default gen_random_uuid(),
