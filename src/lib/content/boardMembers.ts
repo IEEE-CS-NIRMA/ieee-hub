@@ -9,7 +9,13 @@ export interface BoardMember {
   bio: string;
   themeVariant: BoardThemeVariant;
   photoUrl: string | null;
+  photoPositionY: number;
   linkedinUrl: string | null;
+}
+
+export interface AdminBoardMember extends BoardMember {
+  isPublished: boolean;
+  sortOrder: number;
 }
 
 interface BoardMemberRow {
@@ -19,7 +25,10 @@ interface BoardMemberRow {
   bio: string;
   theme_variant: BoardThemeVariant;
   photo_url: string | null;
+  photo_position_y: number | null;
   linkedin_url: string | null;
+  is_published: boolean;
+  sort_order: number;
 }
 
 export interface BoardMembersQueryResult {
@@ -41,6 +50,7 @@ export const fallbackBoardMembers: BoardMember[] = [
     bio: "Final year CSE student passionate about AI and community building.",
     themeVariant: "primary",
     photoUrl: null,
+    photoPositionY: 50,
     linkedinUrl: null,
   },
   {
@@ -50,6 +60,7 @@ export const fallbackBoardMembers: BoardMember[] = [
     bio: "Leading initiatives in cloud computing and open source advocacy.",
     themeVariant: "secondary",
     photoUrl: null,
+    photoPositionY: 50,
     linkedinUrl: null,
   },
   {
@@ -59,6 +70,7 @@ export const fallbackBoardMembers: BoardMember[] = [
     bio: "Full-stack developer and competitive programmer with 1500+ on Codeforces.",
     themeVariant: "inverse",
     photoUrl: null,
+    photoPositionY: 50,
     linkedinUrl: null,
   },
   {
@@ -68,6 +80,7 @@ export const fallbackBoardMembers: BoardMember[] = [
     bio: "UI/UX enthusiast crafting beautiful and accessible digital experiences.",
     themeVariant: "primary",
     photoUrl: null,
+    photoPositionY: 50,
     linkedinUrl: null,
   },
   {
@@ -77,6 +90,7 @@ export const fallbackBoardMembers: BoardMember[] = [
     bio: "Organized 20+ tech events and hackathons with 1000+ participants.",
     themeVariant: "secondary",
     photoUrl: null,
+    photoPositionY: 50,
     linkedinUrl: null,
   },
   {
@@ -86,9 +100,18 @@ export const fallbackBoardMembers: BoardMember[] = [
     bio: "Building the IEEE CS Nirma brand across digital platforms.",
     themeVariant: "inverse",
     photoUrl: null,
+    photoPositionY: 50,
     linkedinUrl: null,
   },
 ];
+
+function normalizePhotoPositionY(value: number | null) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return 50;
+  }
+
+  return Math.min(100, Math.max(0, value));
+}
 
 function mapBoardMemberRow(row: BoardMemberRow): BoardMember {
   return {
@@ -98,7 +121,16 @@ function mapBoardMemberRow(row: BoardMemberRow): BoardMember {
     bio: row.bio,
     themeVariant: row.theme_variant,
     photoUrl: row.photo_url,
+    photoPositionY: normalizePhotoPositionY(row.photo_position_y),
     linkedinUrl: row.linkedin_url,
+  };
+}
+
+function mapAdminBoardMemberRow(row: BoardMemberRow): AdminBoardMember {
+  return {
+    ...mapBoardMemberRow(row),
+    isPublished: row.is_published,
+    sortOrder: row.sort_order,
   };
 }
 
@@ -117,7 +149,9 @@ export async function fetchPublishedBoardMembers(): Promise<BoardMembersQueryRes
 
   const { data, error } = await supabase
     .from("board_members")
-    .select("id, full_name, position, bio, theme_variant, photo_url, linkedin_url")
+    .select(
+      "id, full_name, position, bio, theme_variant, photo_url, photo_position_y, linkedin_url",
+    )
     .eq("is_published", true)
     .order("sort_order", { ascending: true })
     .order("full_name", { ascending: true });
@@ -131,4 +165,46 @@ export async function fetchPublishedBoardMembers(): Promise<BoardMembersQueryRes
     items: (data as BoardMemberRow[]).map(mapBoardMemberRow),
     source: "supabase",
   };
+}
+
+export async function fetchBoardMembersForAdmin(): Promise<AdminBoardMember[]> {
+  if (!isSupabaseConfigured || !supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("board_members")
+    .select(
+      "id, full_name, position, bio, theme_variant, photo_url, photo_position_y, linkedin_url, is_published, sort_order",
+    )
+    .order("sort_order", { ascending: true })
+    .order("full_name", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as BoardMemberRow[]).map(mapAdminBoardMemberRow);
+}
+
+export async function updateBoardMemberPhotoPosition(
+  memberId: string,
+  photoPositionY: number,
+) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+
+  const normalizedValue = Math.min(100, Math.max(0, Math.round(photoPositionY)));
+
+  const { error } = await supabase
+    .from("board_members")
+    .update({ photo_position_y: normalizedValue })
+    .eq("id", memberId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return normalizedValue;
 }

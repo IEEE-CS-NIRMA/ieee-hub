@@ -131,6 +131,7 @@ create table if not exists public.board_members (
   bio text not null,
   theme_variant text not null default 'primary' check (theme_variant in ('primary', 'secondary', 'inverse')),
   photo_url text,
+  photo_position_y integer not null default 50 check (photo_position_y between 0 and 100),
   linkedin_url text,
   is_published boolean not null default true,
   sort_order integer not null default 0,
@@ -139,6 +140,15 @@ create table if not exists public.board_members (
 );
 
 alter table public.board_members add column if not exists photo_url text;
+alter table public.board_members add column if not exists photo_position_y integer;
+update public.board_members set photo_position_y = 50 where photo_position_y is null;
+alter table public.board_members alter column photo_position_y set default 50;
+alter table public.board_members alter column photo_position_y set not null;
+
+alter table public.board_members drop constraint if exists board_members_photo_position_y_check;
+alter table public.board_members
+add constraint board_members_photo_position_y_check
+check (photo_position_y between 0 and 100);
 
 create index if not exists board_members_published_sort_idx on public.board_members (is_published, sort_order, full_name);
 
@@ -165,6 +175,7 @@ insert into public.board_members (
   bio,
   theme_variant,
   photo_url,
+  photo_position_y,
   linkedin_url,
   is_published,
   sort_order
@@ -176,6 +187,7 @@ values
     'Final year CSE student passionate about AI and community building.',
     'primary',
     null,
+    50,
     null,
     true,
     1
@@ -186,6 +198,7 @@ values
     'Leading initiatives in cloud computing and open source advocacy.',
     'secondary',
     null,
+    50,
     null,
     true,
     2
@@ -196,6 +209,7 @@ values
     'Full-stack developer and competitive programmer with 1500+ on Codeforces.',
     'inverse',
     null,
+    50,
     null,
     true,
     3
@@ -206,6 +220,7 @@ values
     'UI/UX enthusiast crafting beautiful and accessible digital experiences.',
     'primary',
     null,
+    50,
     null,
     true,
     4
@@ -216,6 +231,7 @@ values
     'Organized 20+ tech events and hackathons with 1000+ participants.',
     'secondary',
     null,
+    50,
     null,
     true,
     5
@@ -226,8 +242,120 @@ values
     'Building the IEEE CS Nirma brand across digital platforms.',
     'inverse',
     null,
+    50,
     null,
     true,
     6
   )
 on conflict (full_name) do nothing;
+
+create table if not exists public.gallery_items (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  caption text,
+  image_url text not null,
+  alt_text text,
+  category text,
+  event_id uuid references public.events(id) on delete set null,
+  taken_at timestamptz,
+  is_published boolean not null default true,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create index if not exists gallery_items_published_sort_idx
+on public.gallery_items (is_published, sort_order, taken_at desc);
+
+create index if not exists gallery_items_event_idx
+on public.gallery_items (event_id);
+
+alter table public.gallery_items enable row level security;
+
+drop policy if exists "Public can read published gallery items" on public.gallery_items;
+create policy "Public can read published gallery items"
+on public.gallery_items
+for select
+to anon, authenticated
+using (is_published = true);
+
+drop policy if exists "Authenticated users can manage gallery items" on public.gallery_items;
+create policy "Authenticated users can manage gallery items"
+on public.gallery_items
+for all
+to authenticated
+using (true)
+with check (true);
+
+insert into public.gallery_items (
+  title,
+  caption,
+  image_url,
+  alt_text,
+  category,
+  taken_at,
+  is_published,
+  sort_order
+)
+values
+  (
+    'Workshop Coding Session',
+    'Hands-on workshop session with active coding.',
+    'https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80',
+    'Students coding in a workshop',
+    'workshop',
+    '2025-06-05T10:00:00+05:30',
+    true,
+    1
+  ),
+  (
+    'Team Collaboration',
+    'Participants collaborating during a chapter event.',
+    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
+    'Team collaboration during event',
+    'event',
+    '2025-06-12T12:30:00+05:30',
+    true,
+    2
+  ),
+  (
+    'Speaker Session',
+    'Industry expert session in the auditorium.',
+    'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80',
+    'Speaker session in auditorium',
+    'talk',
+    '2025-06-20T16:00:00+05:30',
+    true,
+    3
+  ),
+  (
+    'Hackathon Night',
+    'Late-night build energy at the hackathon.',
+    'https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=900&q=80',
+    'Night hackathon desk setup',
+    'hackathon',
+    '2025-07-01T22:00:00+05:30',
+    true,
+    4
+  ),
+  (
+    'Winner Moments',
+    'Winners celebrating after the final round.',
+    'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=900&q=80',
+    'Winners with medals',
+    'competition',
+    '2025-07-02T19:00:00+05:30',
+    true,
+    5
+  ),
+  (
+    'Community Photo',
+    'Group photo with students and organizers.',
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80',
+    'Group photo at tech event',
+    'community',
+    '2025-07-05T18:30:00+05:30',
+    true,
+    6
+  )
+on conflict do nothing;

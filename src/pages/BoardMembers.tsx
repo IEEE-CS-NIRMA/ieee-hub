@@ -17,7 +17,7 @@ import {
 } from "@/lib/content/boardMembers";
 
 const BoardMembers = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ["board-members"],
     queryFn: fetchPublishedBoardMembers,
     placeholderData: {
@@ -78,7 +78,7 @@ const BoardMembers = () => {
       {/* ── Grid ─────────────────────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          {data?.source === "fallback" && (
+          {!isLoading && !isPlaceholderData && data?.source === "fallback" && (
             <div className="brutal-border bg-secondary text-secondary-foreground px-4 py-3 mb-8 font-heading font-bold text-xs uppercase tracking-wide inline-flex">
               Demo data active. Connect Supabase to manage board members
               dynamically.
@@ -87,8 +87,7 @@ const BoardMembers = () => {
 
           <motion.div
             initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
+            animate="visible"
             variants={staggerContainer}
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
@@ -119,6 +118,9 @@ const BoardMembers = () => {
                       src={member.photoUrl}
                       alt={member.name}
                       className="absolute inset-0 w-full h-full object-cover"
+                      style={{
+                        objectPosition: `center ${member.photoPositionY}%`,
+                      }}
                       loading="lazy"
                     />
                   )}

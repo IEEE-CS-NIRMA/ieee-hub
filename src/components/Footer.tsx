@@ -38,7 +38,7 @@ const Footer = () => {
             <h3 className="font-heading font-extrabold text-lg mb-4 uppercase">
               Quick Links
             </h3>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col items-start gap-2">
               {[
                 { to: "/", label: "Home" },
                 { to: "/about", label: "About Us" },
@@ -49,7 +49,7 @@ const Footer = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="font-body text-sm hover:text-primary transition-colors uppercase tracking-wide"
+                  className="inline-flex w-fit font-body text-sm hover:text-primary transition-colors uppercase tracking-wide"
                 >
                   {link.label}
                 </Link>

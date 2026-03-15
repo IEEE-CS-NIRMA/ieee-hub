@@ -93,10 +93,42 @@ const buildItems = (pool: GalleryImage[], seg: number) => {
 
   const totalSlots = coords.length;
   const normalizedImages = pool.length > 0 ? pool : DEFAULT_IMAGES;
-  const usedImages = Array.from(
-    { length: totalSlots },
-    (_, i) => normalizedImages[i % normalizedImages.length],
-  );
+
+  const shuffle = <T,>(input: T[]) => {
+    const arr = [...input];
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+
+  const usedImages: GalleryImage[] = [];
+  let deck = shuffle(normalizedImages);
+  let deckIndex = 0;
+
+  for (let i = 0; i < totalSlots; i += 1) {
+    if (deckIndex >= deck.length) {
+      deck = shuffle(normalizedImages);
+      deckIndex = 0;
+    }
+
+    let candidate = deck[deckIndex];
+
+    if (
+      normalizedImages.length > 1 &&
+      usedImages.length > 0 &&
+      candidate.src === usedImages[usedImages.length - 1].src
+    ) {
+      const nextIndex = (deckIndex + 1) % deck.length;
+      candidate = deck[nextIndex];
+      deck[nextIndex] = deck[deckIndex];
+      deck[deckIndex] = candidate;
+    }
+
+    usedImages.push(candidate);
+    deckIndex += 1;
+  }
 
   return coords.map((c, i) => ({
     ...c,

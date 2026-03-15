@@ -168,7 +168,7 @@ const Events = () => {
     isSubmittingRegistration,
   ]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isPlaceholderData } = useQuery({
     queryKey: ["events"],
     queryFn: fetchPublishedEvents,
     placeholderData: {
@@ -291,7 +291,7 @@ const Events = () => {
       {/* ── Filters + Grid ───────────────────────────────────── */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          {!isLoading && data?.source === "fallback" && (
+          {!isLoading && !isPlaceholderData && data?.source === "fallback" && (
             <div className="brutal-border bg-secondary text-secondary-foreground px-4 py-3 mb-8 font-heading font-bold text-xs uppercase tracking-wide inline-flex">
               Demo data active. Connect Supabase to manage events dynamically.
             </div>

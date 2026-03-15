@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import DomeGallery from "@/components/ui/dome-gallery";
 import AnimatedText from "@/components/AnimatedText";
 import {
@@ -7,35 +8,27 @@ import {
   lineReveal,
   staggerContainer,
 } from "@/lib/animations";
-
-const dummyPhotos = [
-  {
-    src: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=900&q=80",
-    alt: "Students coding in a workshop",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",
-    alt: "Team collaboration during event",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80",
-    alt: "Speaker session in auditorium",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1526378722484-bd91ca387e72?auto=format&fit=crop&w=900&q=80",
-    alt: "Night hackathon desk setup",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=900&q=80",
-    alt: "Winners with medals",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=900&q=80",
-    alt: "Group photo at tech event",
-  },
-];
+import {
+  fallbackGalleryItems,
+  fetchPublishedGalleryItems,
+} from "@/lib/content/gallery";
 
 const Gallery = () => {
+  const { data, isLoading, isPlaceholderData } = useQuery({
+    queryKey: ["gallery-items"],
+    queryFn: fetchPublishedGalleryItems,
+    placeholderData: {
+      items: fallbackGalleryItems,
+      source: "fallback" as const,
+    },
+  });
+
+  const galleryItems = data?.items ?? fallbackGalleryItems;
+  const photos = galleryItems.map((item) => ({
+    src: item.imageUrl,
+    alt: item.altText,
+  }));
+
   return (
     <div className="min-h-screen">
       <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground overflow-hidden">
@@ -84,9 +77,28 @@ const Gallery = () => {
 
       <section className="py-14 md:py-16 px-4">
         <div className="container mx-auto">
+          {!isLoading && !isPlaceholderData && data?.source === "fallback" && (
+            <div className="brutal-border bg-secondary text-secondary-foreground px-4 py-3 mb-8 font-heading font-bold text-xs uppercase tracking-wide inline-flex">
+              Demo data active. Connect Supabase to manage gallery items
+              dynamically.
+            </div>
+          )}
+
+          {isLoading && photos.length === 0 && (
+            <div className="mb-8 font-heading font-bold uppercase tracking-wide text-sm text-muted-foreground">
+              Loading gallery...
+            </div>
+          )}
+
+          {!isLoading && photos.length === 0 && (
+            <div className="brutal-border bg-background px-4 py-3 mb-8 font-body text-muted-foreground">
+              No gallery images found yet.
+            </div>
+          )}
+
           <div className="brutal-card p-3 md:p-4 relative overflow-hidden h-[68vh] min-h-[520px]">
             <DomeGallery
-              images={dummyPhotos}
+              images={photos}
               fit={0.8}
               minRadius={750}
               maxVerticalRotationDeg={8}
