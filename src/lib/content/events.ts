@@ -33,6 +33,36 @@ interface EventRow {
   registration_link: string | null;
 }
 
+interface AdminEventRow extends EventRow {
+  is_published: boolean;
+  sort_order: number;
+}
+
+export interface AdminEventItem {
+  id: string;
+  title: string;
+  description: string;
+  category: EventCategory;
+  eventDate: string | null;
+  posterUrl: string | null;
+  registrationMode: EventRegistrationMode;
+  registrationLink: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+}
+
+export interface AdminEventUpsertInput {
+  title: string;
+  description: string;
+  category: EventCategory;
+  eventDate: string | null;
+  posterUrl: string | null;
+  registrationMode: EventRegistrationMode;
+  registrationLink: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+}
+
 export interface EventsQueryResult {
   items: EventItem[];
   source: "supabase" | "fallback";
@@ -45,6 +75,21 @@ export const eventFilters: { label: string; value: EventFilter }[] = [
   { label: "Talks", value: "talk" },
   { label: "Hackathons", value: "hackathon" },
 ];
+
+export function getEventCategoryLabel(category: EventCategory) {
+  switch (category) {
+    case "workshop":
+      return "Workshop";
+    case "competition":
+      return "Competition";
+    case "talk":
+      return "Talk";
+    case "hackathon":
+      return "Hackathon";
+    default:
+      return category;
+  }
+}
 
 export const fallbackEvents: EventItem[] = [
   {
@@ -166,6 +211,46 @@ function mapEventRow(row: EventRow): EventItem {
   };
 }
 
+function cleanOptionalText(value: string | null) {
+  const normalized = value?.trim();
+  return normalized ? normalized : null;
+}
+
+function mapAdminEventRow(row: AdminEventRow): AdminEventItem {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    category: row.category,
+    eventDate: row.event_date,
+    posterUrl: row.poster_url,
+    registrationMode: row.registration_mode,
+    registrationLink: row.registration_link,
+    isPublished: row.is_published,
+    sortOrder: row.sort_order,
+  };
+}
+
+function buildAdminEventPayload(input: AdminEventUpsertInput) {
+  const registrationMode = input.registrationMode;
+  const registrationLink =
+    registrationMode === "external"
+      ? cleanOptionalText(input.registrationLink)
+      : null;
+
+  return {
+    title: input.title.trim(),
+    description: input.description.trim(),
+    category: input.category,
+    event_date: cleanOptionalText(input.eventDate),
+    poster_url: cleanOptionalText(input.posterUrl),
+    registration_mode: registrationMode,
+    registration_link: registrationLink,
+    is_published: input.isPublished,
+    sort_order: Math.max(0, Math.round(input.sortOrder)),
+  };
+}
+
 export async function fetchPublishedEvents(): Promise<EventsQueryResult> {
   if (!isSupabaseConfigured || !supabase) {
     return { items: fallbackEvents, source: "fallback" };
@@ -187,4 +272,102 @@ export async function fetchPublishedEvents(): Promise<EventsQueryResult> {
     items: (data as EventRow[]).map(mapEventRow),
     source: "supabase",
   };
+}
+
+export async function fetchEventsForAdmin(): Promise<AdminEventItem[]> {
+  if (!isSupabaseConfigured || !supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("events")
+    .select(
+      "id, title, description, category, event_date, poster_url, registration_mode, registration_link, is_published, sort_order",
+    )
+    .order("event_date", { ascending: true })
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as AdminEventRow[]).map(mapAdminEventRow);
+}
+
+export async function updateEventForAdmin(
+  eventId: string,
+  input: AdminEventUpsertInput,
+) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+
+  if (!input.title.trim()) {
+    throw new Error("Title is required");
+  }
+
+  if (!input.description.trim()) {
+    throw new Error("Description is required");
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .update(buildAdminEventPayload(input))
+    .eq("id", eventId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function createEventForAdmin(input: AdminEventUpsertInput) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+
+  if (!input.title.trim()) {
+    throw new Error("Title is required");
+  }
+
+  if (!input.description.trim()) {
+    throw new Error("Description is required");
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .insert(buildAdminEventPayload(input));
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function setEventPublishedForAdmin(
+  eventId: string,
+  isPublished: boolean,
+) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+
+  const { error } = await supabase
+    .from("events")
+    .update({ is_published: isPublished })
+    .eq("id", eventId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+export async function deleteEventForAdmin(eventId: string) {
+  if (!isSupabaseConfigured || !supabase) {
+    throw new Error("Supabase is not configured");
+  }
+
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }

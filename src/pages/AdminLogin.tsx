@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { getAdminEmailHint, isAdminSession } from "@/lib/adminAuth";
+import { isAdminSession } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
@@ -70,7 +70,7 @@ const AdminLogin = () => {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/admin`,
+        emailRedirectTo: `${window.location.origin}/admin/events`,
       },
     });
     setIsSending(false);
@@ -106,7 +106,7 @@ const AdminLogin = () => {
   }
 
   if (sessionReady && isAlreadyAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin/events" replace />;
   }
 
   return (
@@ -143,10 +143,6 @@ const AdminLogin = () => {
             {isSending ? "Sending..." : "Send Magic Link"}
           </button>
         </form>
-
-        <div className="mt-6 brutal-border bg-secondary text-secondary-foreground px-4 py-3 text-xs font-heading font-bold uppercase tracking-wide">
-          Allowed admins: {getAdminEmailHint()}
-        </div>
 
         <button
           type="button"

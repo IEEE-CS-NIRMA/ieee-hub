@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -23,6 +29,10 @@ import Events from "./pages/Events";
 import Gallery from "./pages/Gallery";
 import BoardMembers from "./pages/BoardMembers";
 import Contact from "./pages/Contact";
+import AdminLogin from "./pages/AdminLogin";
+import AdminPanel from "./pages/AdminPanel";
+import AdminEvents from "./pages/AdminEvents";
+import AdminMembers from "./pages/AdminMembers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +81,15 @@ const App = () => {
                   <Route path="/Gallery" element={<Gallery />} />
                   <Route path="/board" element={<BoardMembers />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/login/*" element={<AdminLogin />} />
+                  <Route
+                    path="/admin-login"
+                    element={<Navigate to="/admin/login" replace />}
+                  />
+                  <Route path="/admin" element={<AdminPanel />} />
+                  <Route path="/admin/events" element={<AdminEvents />} />
+                  <Route path="/admin/members" element={<AdminMembers />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

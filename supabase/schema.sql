@@ -131,6 +131,7 @@ create table if not exists public.board_members (
   bio text not null,
   theme_variant text not null default 'primary' check (theme_variant in ('primary', 'secondary', 'inverse')),
   photo_url text,
+  photo_position_x integer not null default 50 check (photo_position_x between 0 and 100),
   photo_position_y integer not null default 50 check (photo_position_y between 0 and 100),
   linkedin_url text,
   is_published boolean not null default true,
@@ -140,10 +141,19 @@ create table if not exists public.board_members (
 );
 
 alter table public.board_members add column if not exists photo_url text;
+alter table public.board_members add column if not exists photo_position_x integer;
 alter table public.board_members add column if not exists photo_position_y integer;
+update public.board_members set photo_position_x = 50 where photo_position_x is null;
 update public.board_members set photo_position_y = 50 where photo_position_y is null;
+alter table public.board_members alter column photo_position_x set default 50;
 alter table public.board_members alter column photo_position_y set default 50;
+alter table public.board_members alter column photo_position_x set not null;
 alter table public.board_members alter column photo_position_y set not null;
+
+alter table public.board_members drop constraint if exists board_members_photo_position_x_check;
+alter table public.board_members
+add constraint board_members_photo_position_x_check
+check (photo_position_x between 0 and 100);
 
 alter table public.board_members drop constraint if exists board_members_photo_position_y_check;
 alter table public.board_members
@@ -175,6 +185,7 @@ insert into public.board_members (
   bio,
   theme_variant,
   photo_url,
+  photo_position_x,
   photo_position_y,
   linkedin_url,
   is_published,
@@ -188,6 +199,7 @@ values
     'primary',
     null,
     50,
+    50,
     null,
     true,
     1
@@ -198,6 +210,7 @@ values
     'Leading initiatives in cloud computing and open source advocacy.',
     'secondary',
     null,
+    50,
     50,
     null,
     true,
@@ -210,6 +223,7 @@ values
     'inverse',
     null,
     50,
+    50,
     null,
     true,
     3
@@ -220,6 +234,7 @@ values
     'UI/UX enthusiast crafting beautiful and accessible digital experiences.',
     'primary',
     null,
+    50,
     50,
     null,
     true,
@@ -232,6 +247,7 @@ values
     'secondary',
     null,
     50,
+    50,
     null,
     true,
     5
@@ -242,6 +258,7 @@ values
     'Building the IEEE CS Nirma brand across digital platforms.',
     'inverse',
     null,
+    50,
     50,
     null,
     true,

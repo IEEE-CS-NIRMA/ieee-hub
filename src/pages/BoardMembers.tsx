@@ -119,7 +119,7 @@ const BoardMembers = () => {
                       alt={member.name}
                       className="absolute inset-0 w-full h-full object-cover"
                       style={{
-                        objectPosition: `center ${member.photoPositionY}%`,
+                        objectPosition: `${member.photoPositionX}% ${member.photoPositionY}%`,
                       }}
                       loading="lazy"
                     />
