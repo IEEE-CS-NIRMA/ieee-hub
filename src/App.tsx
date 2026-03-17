@@ -30,14 +30,13 @@ import Gallery from "./pages/Gallery";
 import BoardMembers from "./pages/BoardMembers";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
-import AdminPanel from "./pages/AdminPanel";
 import AdminEvents from "./pages/AdminEvents";
 import AdminMembers from "./pages/AdminMembers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
-const TRACE_DURATION_MS = 1900;
-const REVEAL_DURATION_MS = 2000;
+const TRACE_DURATION_MS = 2500;
+const REVEAL_DURATION_MS = 5000;
 const REVEAL_UNMOUNT_BUFFER_MS = 0;
 
 const App = () => {
@@ -87,7 +86,10 @@ const App = () => {
                     path="/admin-login"
                     element={<Navigate to="/admin/login" replace />}
                   />
-                  <Route path="/admin" element={<AdminPanel />} />
+                  <Route
+                    path="/admin"
+                    element={<Navigate to="/admin/events" replace />}
+                  />
                   <Route path="/admin/events" element={<AdminEvents />} />
                   <Route path="/admin/members" element={<AdminMembers />} />
                   <Route path="*" element={<NotFound />} />
@@ -96,7 +98,12 @@ const App = () => {
               <Footer />
             </div>
           </BrowserRouter>
-          {showLoader && <LogoLoader phase={loaderPhase} />}
+          {showLoader && (
+            <LogoLoader
+              phase={loaderPhase}
+              revealDurationMs={REVEAL_DURATION_MS}
+            />
+          )}
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

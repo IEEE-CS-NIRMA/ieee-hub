@@ -3,10 +3,16 @@ import "./LogoLoader.css";
 
 type LogoLoaderProps = {
   phase: "tracing" | "revealing";
+  revealDurationMs?: number;
 };
-const LogoLoader = ({ phase }: LogoLoaderProps) => {
+const LogoLoader = ({ phase, revealDurationMs = 2000 }: LogoLoaderProps) => {
   return (
-    <div className={`logo-loader-container logo-loader-${phase}`}>
+    <div
+      className={`logo-loader-container logo-loader-${phase}`}
+      style={{
+        ["--loader-reveal-duration" as string]: `${revealDurationMs}ms`,
+      }}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="350"
