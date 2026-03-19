@@ -171,7 +171,7 @@ const AdminMembers = () => {
               <article key={member.id} className="brutal-border p-4">
                 <div className="grid md:grid-cols-[minmax(260px,340px)_1fr] gap-4 items-start">
                   <div
-                    className={`w-full h-48 brutal-border relative overflow-hidden flex items-center justify-center ${boardThemeClasses[member.themeVariant]}`}
+                    className={`w-full h-72 brutal-border relative overflow-hidden flex items-center justify-center ${boardThemeClasses[member.themeVariant]}`}
                   >
                     {member.photoUrl ? (
                       <img

@@ -89,7 +89,7 @@ const BoardMembers = () => {
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             {isLoading && members.length === 0 && (
               <div className="md:col-span-2 lg:col-span-3 font-heading font-bold uppercase tracking-wide text-sm text-muted-foreground">
@@ -111,7 +111,7 @@ const BoardMembers = () => {
               >
                 {/* Avatar with overlay reveal effect */}
                 <div
-                  className={`w-full h-48 brutal-border mb-6 flex items-center justify-center relative overflow-hidden ${boardThemeClasses[member.themeVariant]}`}
+                  className={`w-full h-72 brutal-border mb-4 flex items-center justify-center relative overflow-hidden ${boardThemeClasses[member.themeVariant]}`}
                 >
                   {member.photoUrl && (
                     <img
