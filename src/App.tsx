@@ -34,7 +34,15 @@ import AdminEvents from "./pages/AdminEvents";
 import AdminMembers from "./pages/AdminMembers";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Create QueryClient outside component to avoid recreation
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+    },
+  },
+});
 const TRACE_DURATION_MS = 2500;
 const REVEAL_DURATION_MS = 5000;
 const REVEAL_UNMOUNT_BUFFER_MS = 0;

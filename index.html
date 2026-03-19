@@ -35,6 +35,16 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      // Enable pointer events immediately to prevent interaction lag during JS parsing
+      document.addEventListener("DOMContentLoaded", function () {
+        document.documentElement.style.pointerEvents = "auto";
+      });
+      // Fallback: ensure pointer events after 100ms
+      setTimeout(function () {
+        document.documentElement.style.pointerEvents = "auto";
+      }, 100);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -9,18 +9,29 @@ const CustomCursor = () => {
   const { theme } = useTheme();
 
   useEffect(() => {
+    let lastFooterCheckTime = 0;
+    const FOOTER_CHECK_INTERVAL = 100; // Check every 100ms instead of every frame
+
     const move = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
       if (!isVisible) setIsVisible(true);
 
-      // Check if cursor is inside the footer or any inverted section
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      setIsInFooter(!!el?.closest("footer, [data-cursor-invert]"));
+      // Throttle the expensive elementFromPoint check
+      const now = Date.now();
+      if (now - lastFooterCheckTime > FOOTER_CHECK_INTERVAL) {
+        lastFooterCheckTime = now;
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        setIsInFooter(!!el?.closest("footer, [data-cursor-invert]"));
+      }
     };
 
     const handleOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest("button, a, [role='button'], .brutal-btn, input, textarea, select")) {
+      if (
+        target.closest(
+          "button, a, [role='button'], .brutal-btn, input, textarea, select",
+        )
+      ) {
         setIsHovering(true);
       }
     };
@@ -29,11 +40,12 @@ const CustomCursor = () => {
     const handleLeave = () => setIsVisible(false);
     const handleEnter = () => setIsVisible(true);
 
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseover", handleOver);
-    window.addEventListener("mouseout", handleOut);
-    document.addEventListener("mouseleave", handleLeave);
-    document.addEventListener("mouseenter", handleEnter);
+    // Use passive: true for mousemove to allow browser optimizations
+    window.addEventListener("mousemove", move, { passive: true });
+    window.addEventListener("mouseover", handleOver, { passive: true });
+    window.addEventListener("mouseout", handleOut, { passive: true });
+    document.addEventListener("mouseleave", handleLeave, { passive: true });
+    document.addEventListener("mouseenter", handleEnter, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", move);
@@ -53,7 +65,10 @@ const CustomCursor = () => {
   const size = isHovering ? 48 : 32;
 
   // Hide on touch devices
-  if (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches) {
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia("(pointer: coarse)").matches
+  ) {
     return null;
   }
 
