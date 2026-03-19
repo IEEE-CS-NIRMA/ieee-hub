@@ -1,26 +1,164 @@
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Mail, MapPin, Linkedin, Github } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
-import { useState } from "react";
-import {
-  fadeUp,
-  slideLeft,
-  slideRight,
-  staggerContainer,
-  lineReveal,
-  badgePop,
-} from "@/lib/animations";
-import AnimatedText from "@/components/AnimatedText";
+import { SplineScene } from "@/components/ui/splite";
 
 const socialLinks = [
-  { label: "LinkedIn", icon: Linkedin },
-  { label: "Discord", icon: SiDiscord },
-  { label: "GitHub", icon: Github },
+  { label: "LinkedIn", icon: Linkedin, href: "#" },
+  { label: "Discord", icon: SiDiscord, href: "#" },
+  { label: "GitHub", icon: Github, href: "#" },
 ];
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [focused, setFocused] = useState<string | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const interactionRef = useRef<HTMLDivElement | null>(null);
+  const splineHostRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const interactionEl = sectionRef.current;
+    const splineHost = splineHostRef.current;
+    if (!interactionEl || !splineHost) return;
+
+    let rafId = 0;
+    let lastEvent: PointerEvent | null = null;
+    let inside = false;
+
+    const dispatchToSpline = (event: PointerEvent) => {
+      const canvas = splineHost.querySelector("canvas");
+      if (!canvas) return;
+
+      // Let native events drive interaction when cursor is already over the canvas.
+      if (event.target instanceof Node && canvas.contains(event.target)) return;
+
+      const sourceRect = interactionEl.getBoundingClientRect();
+      const targetRect = canvas.getBoundingClientRect();
+      if (sourceRect.width === 0 || sourceRect.height === 0) return;
+
+      const xRatioRaw = (event.clientX - sourceRect.left) / sourceRect.width;
+      const yRatioRaw = (event.clientY - sourceRect.top) / sourceRect.height;
+      const xRatio = Math.min(1, Math.max(0, xRatioRaw));
+      const yRatio = Math.min(1, Math.max(0, yRatioRaw));
+
+      const mappedX = targetRect.left + xRatio * targetRect.width;
+      const mappedY = targetRect.top + yRatio * targetRect.height;
+
+      if (!inside) {
+        inside = true;
+        canvas.dispatchEvent(
+          new PointerEvent("pointerenter", {
+            bubbles: false,
+            cancelable: false,
+            pointerId: event.pointerId,
+            pointerType: event.pointerType,
+            isPrimary: event.isPrimary,
+            clientX: mappedX,
+            clientY: mappedY,
+          }),
+        );
+        canvas.dispatchEvent(
+          new PointerEvent("pointerover", {
+            bubbles: false,
+            cancelable: false,
+            pointerId: event.pointerId,
+            pointerType: event.pointerType,
+            isPrimary: event.isPrimary,
+            clientX: mappedX,
+            clientY: mappedY,
+          }),
+        );
+        canvas.dispatchEvent(
+          new MouseEvent("mouseenter", {
+            bubbles: false,
+            cancelable: false,
+            view: window,
+            clientX: mappedX,
+            clientY: mappedY,
+          }),
+        );
+        canvas.dispatchEvent(
+          new MouseEvent("mouseover", {
+            bubbles: false,
+            cancelable: false,
+            view: window,
+            clientX: mappedX,
+            clientY: mappedY,
+          }),
+        );
+      }
+
+      canvas.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: false,
+          cancelable: false,
+          pointerId: event.pointerId,
+          pointerType: event.pointerType,
+          isPrimary: event.isPrimary,
+          clientX: mappedX,
+          clientY: mappedY,
+        }),
+      );
+      canvas.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: false,
+          cancelable: false,
+          view: window,
+          clientX: mappedX,
+          clientY: mappedY,
+        }),
+      );
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      lastEvent = event;
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        if (lastEvent) dispatchToSpline(lastEvent);
+        rafId = 0;
+      });
+    };
+
+    const onPointerLeave = () => {
+      const canvas = splineHost.querySelector("canvas");
+      if (!canvas || !inside) return;
+      inside = false;
+      canvas.dispatchEvent(
+        new PointerEvent("pointerleave", {
+          bubbles: false,
+          cancelable: false,
+        }),
+      );
+      canvas.dispatchEvent(
+        new PointerEvent("pointerout", {
+          bubbles: false,
+          cancelable: false,
+        }),
+      );
+      canvas.dispatchEvent(
+        new MouseEvent("mouseleave", {
+          bubbles: false,
+          cancelable: false,
+          view: window,
+        }),
+      );
+      canvas.dispatchEvent(
+        new MouseEvent("mouseout", {
+          bubbles: false,
+          cancelable: false,
+          view: window,
+        }),
+      );
+    };
+
+    interactionEl.addEventListener("pointermove", onPointerMove, true);
+    interactionEl.addEventListener("pointerleave", onPointerLeave, true);
+
+    return () => {
+      interactionEl.removeEventListener("pointermove", onPointerMove, true);
+      interactionEl.removeEventListener("pointerleave", onPointerLeave, true);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,265 +168,151 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen">
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground overflow-hidden">
+      <section
+        ref={sectionRef}
+        className="py-16 px-4 border-b-[3px] border-foreground"
+      >
         <div className="container mx-auto">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-          >
-            <motion.div
-              variants={badgePop}
-              custom={0}
-              className="inline-block brutal-border bg-secondary px-4 py-2 mb-6"
-            >
-              <span className="font-heading font-extrabold text-secondary-foreground text-sm uppercase tracking-widest">
-                Get in Touch
-              </span>
-            </motion.div>
+          <h1 className="text-4xl md:text-6xl font-heading font-extrabold mb-3">
+            Contact <span className="text-primary">IEEE CS</span>
+          </h1>
+          <div className="line-accent w-20 mb-8" />
 
-            <div className="overflow-hidden">
-              <AnimatedText
-                text="Contact Us"
-                el="h1"
-                className="text-5xl md:text-7xl font-heading font-extrabold leading-[0.9] mb-4"
-                delay={0.1}
+          <div
+            ref={interactionRef}
+            className="grid lg:grid-cols-2 gap-8 items-stretch lg:min-h-[72vh]"
+          >
+            <form onSubmit={handleSubmit} className="brutal-card space-y-5">
+              <h2 className="text-2xl font-heading font-extrabold">
+                Send a Message
+              </h2>
+
+              <div>
+                <label className="font-heading font-bold text-sm uppercase tracking-wide block mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full brutal-border p-3 bg-background text-foreground font-body focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div>
+                <label className="font-heading font-bold text-sm uppercase tracking-wide block mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full brutal-border p-3 bg-background text-foreground font-body focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="font-heading font-bold text-sm uppercase tracking-wide block mb-2">
+                  Message
+                </label>
+                <textarea
+                  required
+                  rows={6}
+                  value={form.message}
+                  onChange={(e) =>
+                    setForm({ ...form, message: e.target.value })
+                  }
+                  className="w-full brutal-border p-3 bg-background text-foreground font-body focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  placeholder="Write your message..."
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="brutal-btn-primary w-full text-center"
+              >
+                Send Message &rarr;
+              </button>
+            </form>
+
+            <div
+              ref={splineHostRef}
+              className="relative overflow-hidden min-h-[420px] sm:min-h-[520px] lg:min-h-0"
+            >
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="absolute inset-0 h-full w-full"
               />
             </div>
-
-            <motion.div
-              className="line-accent w-20 mb-6 mt-2"
-              variants={lineReveal}
-              custom={0}
-            />
-
-            <motion.p
-              variants={fadeUp}
-              custom={2}
-              className="text-xl font-body text-muted-foreground max-w-2xl"
-            >
-              Have questions? Want to collaborate? Reach out to us!
-            </motion.p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ── Contact Section ───────────────────────────────────── */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            className="grid md:grid-cols-2 gap-8"
-          >
-            {/* Left: Info */}
-            <motion.div variants={slideLeft} custom={0} className="space-y-6">
-              {[
-                {
-                  icon: Mail,
-                  title: "Email",
-                  color: "bg-primary",
-                  iconColor: "text-primary-foreground",
-                  content: (
-                    <a
-                      href="mailto:ieee@nirmauni.ac.in"
-                      className="font-body text-muted-foreground hover:text-primary transition-colors fancy-link"
-                    >
-                      ieee@nirmauni.ac.in
-                    </a>
-                  ),
-                },
-                {
-                  icon: MapPin,
-                  title: "Location",
-                  color: "bg-secondary",
-                  iconColor: "text-secondary-foreground",
-                  content: (
-                    <p className="font-body text-muted-foreground">
-                      Nirma University
-                      <br />
-                      Sarkhej-Gandhinagar Highway
-                      <br />
-                      Ahmedabad, Gujarat 382481
-                    </p>
-                  ),
-                },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.title}
-                  className="brutal-card"
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: i * 0.12,
-                    duration: 0.6,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  whileHover={{
-                    y: -4,
-                    boxShadow: "var(--shadow-brutal-hover)",
-                    transition: { type: "spring", stiffness: 200 },
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    <motion.div
-                      className={`brutal-border ${item.color} p-3 shrink-0`}
-                      whileHover={{ rotate: 10, scale: 1.1 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <item.icon size={24} className={item.iconColor} />
-                    </motion.div>
-                    <div>
-                      <h3 className="font-heading font-extrabold text-lg mb-1">
-                        {item.title}
-                      </h3>
-                      {item.content}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-
-              <motion.div
-                className="brutal-card bg-foreground text-background"
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{
-                  delay: 0.24,
-                  duration: 0.6,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                whileHover={{
-                  y: -4,
-                  boxShadow: "var(--shadow-brutal-hover)",
-                  transition: { type: "spring", stiffness: 200 },
-                }}
-              >
-                <h3 className="font-heading font-extrabold text-lg mb-2">
-                  Follow Us
+      <section className="py-12 px-4">
+        <div className="container mx-auto grid md:grid-cols-3 gap-6">
+          <div className="brutal-card">
+            <div className="flex items-start gap-4">
+              <div className="brutal-border bg-primary p-3 shrink-0">
+                <Mail size={22} className="text-primary-foreground" />
+              </div>
+              <div>
+                <h3 className="font-heading font-extrabold text-lg mb-1">
+                  Email
                 </h3>
-                <p className="font-body text-sm opacity-80 mb-4">
-                  Stay updated with our latest events and announcements.
+                <a
+                  href="mailto:ieee@nirmauni.ac.in"
+                  className="font-body text-muted-foreground hover:text-primary transition-colors"
+                >
+                  ieee@nirmauni.ac.in
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="brutal-card">
+            <div className="flex items-start gap-4">
+              <div className="brutal-border bg-secondary p-3 shrink-0">
+                <MapPin size={22} className="text-secondary-foreground" />
+              </div>
+              <div>
+                <h3 className="font-heading font-extrabold text-lg mb-1">
+                  Location
+                </h3>
+                <p className="font-body text-muted-foreground">
+                  Nirma University
+                  <br />
+                  Sarkhej-Gandhinagar Highway
+                  <br />
+                  Ahmedabad, Gujarat 382481
                 </p>
-                <motion.div
-                  className="flex gap-3"
-                  variants={staggerContainer}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
+              </div>
+            </div>
+          </div>
+
+          <div className="brutal-card bg-foreground text-background">
+            <h3 className="font-heading font-extrabold text-lg mb-2">
+              Follow Us
+            </h3>
+            <p className="font-body text-sm opacity-80 mb-4">
+              Stay updated with our latest events and announcements.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  className="border-[3px] border-background px-3 py-2 font-heading font-bold text-xs uppercase inline-flex items-center gap-2 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
                 >
-                  {socialLinks.map((social, i) => (
-                    <motion.a
-                      key={social.label}
-                      href="#"
-                      variants={badgePop}
-                      custom={i}
-                      className="border-[3px] border-background px-3 py-2 font-heading font-bold text-xs uppercase inline-flex items-center gap-2
-                        hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all"
-                      whileHover={{ y: -3 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <social.icon size={14} />
-                      {social.label}
-                    </motion.a>
-                  ))}
-                </motion.div>
-              </motion.div>
-            </motion.div>
-
-            {/* Right: Form */}
-            <motion.div variants={slideRight} custom={0}>
-              <motion.form
-                onSubmit={handleSubmit}
-                className="brutal-card space-y-6"
-                whileHover={{
-                  boxShadow: "var(--shadow-brutal-hover)",
-                  transition: { duration: 0.2 },
-                }}
-              >
-                <h2 className="text-2xl font-heading font-extrabold mb-2">
-                  Send a Message
-                </h2>
-                <motion.div
-                  className="line-accent w-12 mb-4"
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                />
-
-                {[
-                  {
-                    key: "name",
-                    label: "Name",
-                    type: "text",
-                    placeholder: "Your name",
-                  },
-                  {
-                    key: "email",
-                    label: "Email",
-                    type: "email",
-                    placeholder: "your@email.com",
-                  },
-                ].map((field) => (
-                  <motion.div
-                    key={field.key}
-                    animate={{ y: focused === field.key ? -2 : 0 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <label className="font-heading font-bold text-sm uppercase tracking-wide block mb-2">
-                      {field.label}
-                    </label>
-                    <input
-                      type={field.type}
-                      required
-                      value={form[field.key as "name" | "email"]}
-                      onChange={(e) =>
-                        setForm({ ...form, [field.key]: e.target.value })
-                      }
-                      onFocus={() => setFocused(field.key)}
-                      onBlur={() => setFocused(null)}
-                      className="w-full brutal-border p-3 bg-background text-foreground font-body focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"
-                      placeholder={field.placeholder}
-                    />
-                  </motion.div>
-                ))}
-
-                <motion.div
-                  animate={{ y: focused === "message" ? -2 : 0 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <label className="font-heading font-bold text-sm uppercase tracking-wide block mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    required
-                    rows={5}
-                    value={form.message}
-                    onChange={(e) =>
-                      setForm({ ...form, message: e.target.value })
-                    }
-                    onFocus={() => setFocused("message")}
-                    onBlur={() => setFocused(null)}
-                    className="w-full brutal-border p-3 bg-background text-foreground font-body focus:outline-none focus:ring-2 focus:ring-primary resize-none transition-shadow"
-                    placeholder="Write your message..."
-                  />
-                </motion.div>
-
-                <motion.button
-                  type="submit"
-                  className="brutal-btn-primary w-full text-center"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Send Message →
-                </motion.button>
-              </motion.form>
-            </motion.div>
-          </motion.div>
+                  <social.icon size={14} />
+                  {social.label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>
