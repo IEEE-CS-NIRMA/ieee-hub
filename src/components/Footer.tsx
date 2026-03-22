@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { Linkedin, Github, Instagram } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
+import { useTheme } from "./ThemeProvider";
+import logoBlack from "@/assets/IEEE_CS_Nirma_logo_full_black.svg";
 import logoWhite from "@/assets/IEEE_CS_Nirma_logo_full_white.svg";
 
 const socialLinks = [
@@ -15,6 +17,9 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const { theme } = useTheme();
+  const logo = theme === "dark" ? logoBlack : logoWhite;
+
   return (
     <footer className="bg-foreground text-background brutal-border border-b-0 border-x-0 border-t-[4px]">
       <div className="container mx-auto px-4 py-12">
@@ -22,7 +27,7 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <img
-              src={logoWhite}
+              src={logo}
               alt="IEEE Computer Society"
               className="h-10 w-auto mb-4"
             />
