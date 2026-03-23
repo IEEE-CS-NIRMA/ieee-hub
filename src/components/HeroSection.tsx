@@ -199,7 +199,10 @@ const HeroSection = () => {
 
   return (
     <section ref={rootRef} className="relative h-[400vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-background border-b-[3px] border-foreground">
+      <div
+        className="sticky top-0 h-screen overflow-hidden border-b-[3px] border-foreground"
+        style={{ backgroundColor: "#111A2C" }}
+      >
         <video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
@@ -216,7 +219,7 @@ const HeroSection = () => {
           aria-label="IEEE CS 3D logo animation"
         />
 
-        <div className="absolute inset-0 z-10 pointer-events-none">
+        <div className="absolute inset-0 z-10 pointer-events-none text-white">
           <motion.div
             className="absolute inset-0 flex items-center justify-center px-6 text-center"
             style={{ opacity: beat1.opacity, y: beat1.y }}
@@ -284,7 +287,7 @@ const HeroSection = () => {
 
               <div className="line-accent w-16 mb-6" />
 
-              <p className="text-base md:text-xl font-body max-w-lg mb-7 text-muted-foreground">
+              <p className="text-base md:text-xl font-body max-w-lg mb-7 text-white/85">
                 Empowering innovation, technology, and future engineers.
               </p>
 

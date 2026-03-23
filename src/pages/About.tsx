@@ -1,7 +1,12 @@
 import { motion } from "framer-motion";
 import {
-  fadeUp, slideLeft, slideRight, scaleIn,
-  staggerContainer, lineReveal, badgePop,
+  fadeUp,
+  slideLeft,
+  slideRight,
+  scaleIn,
+  staggerContainer,
+  lineReveal,
+  badgePop,
 } from "@/lib/animations";
 import AnimatedText from "@/components/AnimatedText";
 
@@ -38,8 +43,16 @@ const About = () => {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="py-20 md:py-28 px-4 border-b-[3px] border-foreground overflow-hidden">
         <div className="container mx-auto">
-          <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
-            <motion.div variants={badgePop} custom={0} className="inline-block brutal-border bg-secondary px-4 py-2 mb-6">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+          >
+            <motion.div
+              variants={badgePop}
+              custom={0}
+              className="inline-block brutal-border bg-secondary px-4 py-2 mb-6"
+            >
               <span className="font-heading font-extrabold text-secondary-foreground text-sm uppercase tracking-widest">
                 About Us
               </span>
@@ -54,12 +67,21 @@ const About = () => {
               />
             </div>
 
-            <motion.div className="line-accent w-20 mb-6 mt-2" variants={lineReveal} custom={0} />
+            <motion.div
+              className="line-accent w-20 mb-6 mt-2"
+              variants={lineReveal}
+              custom={0}
+            />
 
-            <motion.p variants={fadeUp} custom={2} className="text-xl font-body text-muted-foreground max-w-2xl">
-              The IEEE Computer Society Student Chapter at Nirma University is a vibrant community
-              of tech enthusiasts, developers, researchers, and innovators working together to make
-              a difference in the world of technology.
+            <motion.p
+              variants={fadeUp}
+              custom={2}
+              className="text-xl font-body text-muted-foreground max-w-2xl"
+            >
+              The IEEE Computer Society Student Chapter at Nirma University is a
+              vibrant community of tech enthusiasts, developers, researchers,
+              and innovators working together to make a difference in the world
+              of technology.
             </motion.p>
           </motion.div>
         </div>
@@ -73,11 +95,15 @@ const About = () => {
               key={section.title}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: false, amount: 0.2 }}
               variants={i % 2 === 0 ? slideLeft : slideRight}
               custom={0}
               className={`brutal-border brutal-shadow p-8 md:p-12 ${i % 2 === 1 ? "md:ml-auto md:max-w-3xl" : ""}`}
-              whileHover={{ y: -5, boxShadow: "var(--shadow-brutal-hover)", transition: { type: "spring", stiffness: 120 } }}
+              whileHover={{
+                y: -5,
+                boxShadow: "var(--shadow-brutal-hover)",
+                transition: { type: "spring", stiffness: 120 },
+              }}
             >
               <div className="flex items-start gap-6">
                 <div className="hidden md:block shrink-0">
@@ -85,27 +111,42 @@ const About = () => {
                     className={`inline-flex items-center justify-center w-14 h-14 brutal-border ${section.accent} font-heading font-extrabold text-lg`}
                     initial={{ scale: 0.5, opacity: 0, rotate: -15 }}
                     whileInView={{ scale: 1, opacity: 1, rotate: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200, damping: 15 }}
+                    viewport={{ once: false }}
+                    transition={{
+                      delay: 0.2,
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 15,
+                    }}
                   >
                     {String(i + 1).padStart(2, "0")}
                   </motion.div>
                 </div>
                 <div className="flex-1">
-                  <div className={`inline-block brutal-border md:hidden ${section.accent} px-4 py-2 mb-4`}>
+                  <div
+                    className={`inline-block brutal-border md:hidden ${section.accent} px-4 py-2 mb-4`}
+                  >
                     <span className="font-heading font-extrabold text-sm uppercase tracking-widest">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-heading font-extrabold mb-4">{section.title}</h2>
+                  <h2 className="text-3xl md:text-4xl font-heading font-extrabold mb-4">
+                    {section.title}
+                  </h2>
                   <motion.div
                     className="line-accent w-12 mb-4"
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    viewport={{ once: false }}
+                    transition={{
+                      delay: 0.3,
+                      duration: 0.6,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
                   />
-                  <p className="font-body text-lg text-muted-foreground">{section.content}</p>
+                  <p className="font-body text-lg text-muted-foreground">
+                    {section.content}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -114,13 +155,30 @@ const About = () => {
       </section>
 
       {/* ── Values ───────────────────────────────────────────── */}
-      <section data-cursor-invert className="py-24 px-4 bg-foreground text-background border-t-[3px] border-foreground">
+      <section
+        data-cursor-invert
+        className="py-24 px-4 bg-foreground text-background border-t-[3px] border-foreground"
+      >
         <div className="container mx-auto">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}>
-            <motion.div variants={badgePop} custom={0} className="inline-block border-[3px] border-background px-4 py-2 mb-4">
-              <span className="font-heading font-bold text-xs uppercase tracking-widest">Principles</span>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.2 }}
+          >
+            <motion.div
+              variants={badgePop}
+              custom={0}
+              className="inline-block border-[3px] border-background px-4 py-2 mb-4"
+            >
+              <span className="font-heading font-bold text-xs uppercase tracking-widest">
+                Principles
+              </span>
             </motion.div>
-            <motion.h2 variants={fadeUp} custom={0} className="text-4xl md:text-5xl font-heading font-extrabold mb-3">
+            <motion.h2
+              variants={fadeUp}
+              custom={0}
+              className="text-4xl md:text-5xl font-heading font-extrabold mb-3"
+            >
               Our <span className="text-primary">Values</span>
             </motion.h2>
             <motion.div
@@ -129,27 +187,34 @@ const About = () => {
               custom={0}
             />
 
-            <motion.div variants={staggerContainer} className="grid md:grid-cols-4 gap-4">
-              {["Innovation", "Collaboration", "Excellence", "Integrity"].map((value, i) => (
-                <motion.div
-                  key={value}
-                  variants={scaleIn}
-                  custom={i + 1}
-                  className="border-[3px] border-background p-6 text-center"
-                  whileHover={{
-                    backgroundColor: "hsl(var(--primary))",
-                    color: "hsl(var(--primary-foreground))",
-                    borderColor: "hsl(var(--primary))",
-                    y: -6,
-                    transition: { duration: 0.22 },
-                  }}
-                >
-                  <span className="font-heading font-extrabold text-xs uppercase tracking-widest opacity-40 block mb-2">
-                    0{i + 1}
-                  </span>
-                  <h3 className="text-2xl font-heading font-extrabold uppercase">{value}</h3>
-                </motion.div>
-              ))}
+            <motion.div
+              variants={staggerContainer}
+              className="grid md:grid-cols-4 gap-4"
+            >
+              {["Innovation", "Collaboration", "Excellence", "Integrity"].map(
+                (value, i) => (
+                  <motion.div
+                    key={value}
+                    variants={scaleIn}
+                    custom={i + 1}
+                    className="border-[3px] border-background p-6 text-center"
+                    whileHover={{
+                      backgroundColor: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                      borderColor: "hsl(var(--primary))",
+                      y: -6,
+                      transition: { duration: 0.22 },
+                    }}
+                  >
+                    <span className="font-heading font-extrabold text-xs uppercase tracking-widest opacity-40 block mb-2">
+                      0{i + 1}
+                    </span>
+                    <h3 className="text-2xl font-heading font-extrabold uppercase">
+                      {value}
+                    </h3>
+                  </motion.div>
+                ),
+              )}
             </motion.div>
           </motion.div>
         </div>

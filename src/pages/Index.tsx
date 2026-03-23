@@ -62,7 +62,7 @@ const Index = () => {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: false, amount: 0.2 }}
             className="grid md:grid-cols-2 gap-16 items-center"
           >
             <motion.div variants={slideLeft} custom={0}>
@@ -156,7 +156,7 @@ const Index = () => {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.15 }}
+            viewport={{ once: false, amount: 0.15 }}
           >
             <motion.div
               variants={badgePop}
@@ -251,7 +251,7 @@ const Index = () => {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.15 }}
+            viewport={{ once: false, amount: 0.15 }}
           >
             <motion.div
               variants={badgePop}
@@ -314,7 +314,7 @@ const Index = () => {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: false, amount: 0.2 }}
           >
             <motion.div
               variants={badgePop}

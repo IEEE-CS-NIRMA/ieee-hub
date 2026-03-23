@@ -128,7 +128,7 @@ const BoardMembers = () => {
                     className={`absolute inset-0 ${member.photoUrl ? "bg-black/20" : "bg-primary"}`}
                     initial={{ scaleY: 1, originY: 0 }}
                     whileInView={{ scaleY: 0 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{
                       delay: i * 0.08 + 0.2,
                       duration: 0.6,
@@ -140,7 +140,7 @@ const BoardMembers = () => {
                       className="text-6xl font-heading font-extrabold opacity-50 relative z-10"
                       initial={{ scale: 0.5, opacity: 0 }}
                       whileInView={{ scale: 1, opacity: 0.5 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: false }}
                       transition={{
                         delay: i * 0.08 + 0.45,
                         type: "spring",
@@ -157,7 +157,7 @@ const BoardMembers = () => {
                   className="inline-block brutal-border bg-primary px-3 py-1 mb-3"
                   initial={{ opacity: 0, x: -15 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false }}
                   transition={{
                     delay: i * 0.08 + 0.5,
                     duration: 0.4,
