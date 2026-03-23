@@ -1,11 +1,10 @@
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Users, Calendar, BookOpen, Trophy } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import AnimatedText from "@/components/AnimatedText";
+import HeroSection from "@/components/HeroSection";
 import {
   fadeUp,
-  fadeIn,
   scaleIn,
   slideLeft,
   slideRight,
@@ -13,9 +12,7 @@ import {
   lineReveal,
   counterVariant,
   badgePop,
-  cardHover,
 } from "@/lib/animations";
-import { useRef } from "react";
 import { fallbackEvents, fetchPublishedEvents } from "@/lib/content/events";
 
 const stats = [
@@ -44,14 +41,6 @@ const whyJoin = [
 ];
 
 const Index = () => {
-  const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const shapeY1 = useTransform(heroProgress, [0, 1], [0, -80]);
-  const shapeY2 = useTransform(heroProgress, [0, 1], [0, 60]);
-  const shapeY3 = useTransform(heroProgress, [0, 1], [0, -40]);
   const { data, isLoading } = useQuery({
     queryKey: ["events"],
     queryFn: fetchPublishedEvents,
@@ -65,108 +54,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section
-        ref={heroRef}
-        className="relative overflow-hidden py-24 md:py-36 px-4"
-      >
-        {/* Parallax background shapes */}
-        <motion.div
-          className="absolute top-10 right-10 w-32 h-32 bg-primary brutal-border brutal-shadow rotate-12 opacity-20"
-          style={{ y: shapeY1 }}
-        />
-        <motion.div
-          className="absolute bottom-20 left-10 w-24 h-24 bg-secondary brutal-border brutal-shadow -rotate-6 opacity-20"
-          style={{ y: shapeY2 }}
-        />
-        <motion.div
-          className="absolute top-1/2 right-1/3 w-16 h-16 bg-foreground opacity-10 rotate-45"
-          style={{ y: shapeY3 }}
-        />
-
-        <div className="container mx-auto relative z-10">
-          {/* Badge */}
-          <motion.div
-            variants={badgePop}
-            custom={0}
-            initial="hidden"
-            animate="visible"
-            className="inline-block brutal-border bg-primary px-4 py-2 mb-6"
-          >
-            <span className="font-heading font-extrabold text-primary-foreground text-sm uppercase tracking-widest">
-              Student Chapter
-            </span>
-          </motion.div>
-
-          {/* Word-by-word headline */}
-          <div
-            className="max-w-4xl mb-6 overflow-hidden"
-            style={{ perspective: 800 }}
-          >
-            <AnimatedText
-              text="IEEE Computer Society —"
-              el="h1"
-              className="text-5xl md:text-7xl lg:text-8xl font-heading font-extrabold leading-[0.95]"
-              delay={0.15}
-            />
-            <motion.span
-              className="block text-5xl md:text-7xl lg:text-8xl font-heading font-extrabold leading-[0.95] text-primary overflow-hidden"
-              initial={{ clipPath: "inset(0% 100% 0% 0%)" }}
-              animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-              transition={{
-                delay: 0.65,
-                duration: 0.9,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            >
-              Nirma University
-            </motion.span>
-          </div>
-
-          {/* Animated accent line */}
-          <motion.div
-            className="line-accent w-24 mb-8"
-            variants={lineReveal}
-            initial="hidden"
-            animate="visible"
-            custom={0}
-            transition={{ delay: 0.9 }}
-          />
-
-          <motion.p
-            variants={fadeUp}
-            custom={0}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.75 }}
-            className="text-xl md:text-2xl font-body max-w-xl mb-10 text-muted-foreground"
-          >
-            Empowering innovation, technology, and future engineers.
-          </motion.p>
-
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-wrap gap-4"
-            style={{ originX: 0 }}
-          >
-            <motion.div variants={fadeUp} custom={1}>
-              <Link
-                to="/events"
-                className="brutal-btn-primary flex items-center gap-2"
-              >
-                Explore Events <ArrowRight size={18} />
-              </Link>
-            </motion.div>
-            <motion.div variants={fadeUp} custom={2}>
-              <a href="#" className="brutal-btn-secondary">
-                Join IEEE
-              </a>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* ── About IEEE CS ─────────────────────────────────────── */}
       <section className="py-24 px-4 border-t-[3px] border-foreground overflow-hidden">
@@ -221,7 +109,7 @@ const Index = () => {
               {[
                 {
                   label: "Est.",
-                  value: "2015",
+                  value: "2025",
                   color: "bg-primary text-primary-foreground",
                 },
                 {
