@@ -101,13 +101,24 @@ const useFinalBeatMotion = (
   return { opacity, y };
 };
 
+type NavigatorWithHints = Navigator & {
+  deviceMemory?: number;
+  connection?: {
+    saveData?: boolean;
+    effectiveType?: string;
+  };
+};
+
 const HeroSection = () => {
   const rootRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const lastSeekAtRef = useRef(0);
   const targetTimeRef = useRef(0);
   const durationRef = useRef(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isLowPowerMode, setIsLowPowerMode] = useState(false);
+  const [videoSrc, setVideoSrc] = useState("/optimized-hero.mp4");
 
   const { scrollYProgress } = useScroll({
     target: rootRef,
@@ -115,6 +126,23 @@ const HeroSection = () => {
   });
 
   useEffect(() => {
+    const nav = navigator as NavigatorWithHints;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const lowCpu =
+      typeof nav.hardwareConcurrency === "number" &&
+      nav.hardwareConcurrency <= 4;
+    const lowMemory =
+      typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4;
+    const saveData = nav.connection?.saveData === true;
+    const slowNetwork = nav.connection?.effectiveType === "2g";
+
+    const lowPower =
+      reducedMotion || lowCpu || lowMemory || saveData || slowNetwork;
+    setIsLowPowerMode(lowPower);
+    setVideoSrc(lowPower ? "/optimized-hero-lite.mp4" : "/optimized-hero.mp4");
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -162,9 +190,19 @@ const HeroSection = () => {
       const video = videoRef.current;
       if (!video) return;
 
-      const nextTime = targetTimeRef.current;
-      if (Math.abs(video.currentTime - nextTime) > 0.016) {
-        video.currentTime = nextTime;
+      const now = performance.now();
+      const minSeekIntervalMs = isLowPowerMode ? 55 : 28;
+      if (now - lastSeekAtRef.current < minSeekIntervalMs) {
+        return;
+      }
+
+      const frameStep = isLowPowerMode ? 1 / 18 : 1 / 30;
+      const quantizedTime =
+        Math.round(targetTimeRef.current / frameStep) * frameStep;
+
+      if (Math.abs(video.currentTime - quantizedTime) > frameStep * 0.65) {
+        video.currentTime = quantizedTime;
+        lastSeekAtRef.current = now;
       }
     });
   });
@@ -215,7 +253,7 @@ const HeroSection = () => {
 
   const beat5 = useFinalBeatMotion(scrollYProgress, 0.85, 0.9, 50);
   const endLogoShift = useTransform(scrollYProgress, (value) =>
-    smoothstep(normalize(clamp01(value), 0.82, 0.92)),
+    isLowPowerMode ? 0 : smoothstep(normalize(clamp01(value), 0.82, 0.92)),
   );
   const videoObjectPosition = useTransform(
     endLogoShift,
@@ -238,11 +276,16 @@ const HeroSection = () => {
             transformOrigin: "center center",
             willChange: "transform",
           }}
-          src="/optimized-hero.mp4"
+          src={videoSrc}
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           disablePictureInPicture
+          onError={() => {
+            if (videoSrc !== "/optimized-hero.mp4") {
+              setVideoSrc("/optimized-hero.mp4");
+            }
+          }}
           aria-label="IEEE CS 3D logo animation"
         />
 
