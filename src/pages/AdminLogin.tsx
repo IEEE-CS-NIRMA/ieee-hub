@@ -4,6 +4,15 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { isAdminSession } from "@/lib/adminAuth";
 import { useToast } from "@/hooks/use-toast";
 
+const getMagicLinkRedirectUrl = () => {
+  const configuredBaseUrl = import.meta.env.VITE_APP_URL?.trim();
+  const baseUrl = configuredBaseUrl?.length
+    ? configuredBaseUrl.replace(/\/$/, "")
+    : window.location.origin;
+
+  return `${baseUrl}/admin/events`;
+};
+
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -70,7 +79,7 @@ const AdminLogin = () => {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/admin/events`,
+        emailRedirectTo: getMagicLinkRedirectUrl(),
       },
     });
     setIsSending(false);
