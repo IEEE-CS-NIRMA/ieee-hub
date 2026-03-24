@@ -20,6 +20,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import LogoLoader from "@/components/LogoLoader";
+import ScrollHint from "@/components/ScrollHint";
 import CustomCursor from "@/components/CustomCursor";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -78,6 +79,7 @@ const App = () => {
           <CustomCursor />
           <BrowserRouter>
             <ScrollToTop />
+            <ScrollHint />
             <div className="flex flex-col min-h-screen">
               <Navbar />
               <main className="flex-1">
