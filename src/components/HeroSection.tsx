@@ -120,6 +120,53 @@ const HeroSection = () => {
   const [isLowPowerMode, setIsLowPowerMode] = useState(false);
   const [videoSrc, setVideoSrc] = useState("/optimized-hero-lite.mp4");
 
+  const scheduleScrub = () => {
+    if (rafRef.current !== null) {
+      return;
+    }
+
+    const tick = () => {
+      const video = videoRef.current;
+      if (!video || !videoLoaded || durationRef.current <= 0) {
+        rafRef.current = null;
+        return;
+      }
+
+      const now = performance.now();
+      const minSeekIntervalMs = isLowPowerMode ? 58 : 40;
+      const frameStep = isLowPowerMode ? 1 / 12 : 1 / 18;
+      const settleThreshold = isLowPowerMode ? 0.1 : 0.065;
+
+      const currentTime = video.currentTime;
+      const targetTime = targetTimeRef.current;
+      const diff = targetTime - currentTime;
+
+      if (Math.abs(diff) <= settleThreshold) {
+        rafRef.current = null;
+        return;
+      }
+
+      if (now - lastSeekAtRef.current >= minSeekIntervalMs) {
+        const maxStep = isLowPowerMode ? 0.1 : 0.14;
+        const nextTime =
+          currentTime + Math.sign(diff) * Math.min(Math.abs(diff), maxStep);
+        const quantizedTime = Math.round(nextTime / frameStep) * frameStep;
+
+        if (typeof video.fastSeek === "function") {
+          video.fastSeek(quantizedTime);
+        } else {
+          video.currentTime = quantizedTime;
+        }
+
+        lastSeekAtRef.current = now;
+      }
+
+      rafRef.current = window.requestAnimationFrame(tick);
+    };
+
+    rafRef.current = window.requestAnimationFrame(tick);
+  };
+
   const { scrollYProgress } = useScroll({
     target: rootRef,
     offset: ["start start", "end end"],
@@ -198,30 +245,7 @@ const HeroSection = () => {
 
     targetTimeRef.current = clamped * durationRef.current;
 
-    if (rafRef.current !== null) {
-      return;
-    }
-
-    rafRef.current = window.requestAnimationFrame(() => {
-      rafRef.current = null;
-      const video = videoRef.current;
-      if (!video) return;
-
-      const now = performance.now();
-      const minSeekIntervalMs = isLowPowerMode ? 110 : 72;
-      if (now - lastSeekAtRef.current < minSeekIntervalMs) {
-        return;
-      }
-
-      const frameStep = isLowPowerMode ? 1 / 10 : 1 / 14;
-      const quantizedTime =
-        Math.round(targetTimeRef.current / frameStep) * frameStep;
-
-      if (Math.abs(video.currentTime - quantizedTime) > frameStep * 0.9) {
-        video.currentTime = quantizedTime;
-        lastSeekAtRef.current = now;
-      }
-    });
+    scheduleScrub();
   });
 
   useEffect(() => {
