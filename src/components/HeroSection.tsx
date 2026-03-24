@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  MotionValue,
   motion,
   useMotionValueEvent,
   useScroll,
-  useSpring,
+  useTransform,
 } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -71,6 +72,35 @@ const getFinalBeatState = (
   return { opacity: 1, y: 0 };
 };
 
+const useBeatMotion = (progress: MotionValue<number>, window: BeatWindow) => {
+  const opacity = useTransform(
+    progress,
+    (value) => getBeatState(clamp01(value), window).opacity,
+  );
+  const y = useTransform(
+    progress,
+    (value) => getBeatState(clamp01(value), window).y,
+  );
+  return { opacity, y };
+};
+
+const useFinalBeatMotion = (
+  progress: MotionValue<number>,
+  start: number,
+  fullIn: number,
+  fromY: number,
+) => {
+  const opacity = useTransform(
+    progress,
+    (value) => getFinalBeatState(clamp01(value), start, fullIn, fromY).opacity,
+  );
+  const y = useTransform(
+    progress,
+    (value) => getFinalBeatState(clamp01(value), start, fullIn, fromY).y,
+  );
+  return { opacity, y };
+};
+
 const HeroSection = () => {
   const rootRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -78,17 +108,10 @@ const HeroSection = () => {
   const targetTimeRef = useRef(0);
   const durationRef = useRef(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const [rawProgress, setRawProgress] = useState(0);
 
   const { scrollYProgress } = useScroll({
     target: rootRef,
     offset: ["start start", "end end"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 160,
-    damping: 26,
-    mass: 0.2,
   });
 
   useEffect(() => {
@@ -121,9 +144,8 @@ const HeroSection = () => {
     };
   }, []);
 
-  useMotionValueEvent(smoothProgress, "change", (value) => {
+  useMotionValueEvent(scrollYProgress, "change", (value) => {
     const clamped = clamp01(value);
-    setRawProgress(clamped);
 
     if (!videoLoaded || durationRef.current <= 0 || !videoRef.current) {
       return;
@@ -155,7 +177,7 @@ const HeroSection = () => {
     };
   }, []);
 
-  const beat1 = getBeatState(rawProgress, {
+  const beat1 = useBeatMotion(scrollYProgress, {
     start: -0.02,
     fullIn: 0,
     fadeOutStart: 0.1,
@@ -164,7 +186,7 @@ const HeroSection = () => {
     toY: -50,
   });
 
-  const beat2 = getBeatState(rawProgress, {
+  const beat2 = useBeatMotion(scrollYProgress, {
     start: 0.15,
     fullIn: 0.2,
     fadeOutStart: 0.4,
@@ -173,7 +195,7 @@ const HeroSection = () => {
     toY: -50,
   });
 
-  const beat3 = getBeatState(rawProgress, {
+  const beat3 = useBeatMotion(scrollYProgress, {
     start: 0.45,
     fullIn: 0.5,
     fadeOutStart: 0.65,
@@ -182,7 +204,7 @@ const HeroSection = () => {
     toY: -50,
   });
 
-  const beat4 = getBeatState(rawProgress, {
+  const beat4 = useBeatMotion(scrollYProgress, {
     start: 0.7,
     fullIn: 0.75,
     fadeOutStart: 0.8,
@@ -191,11 +213,15 @@ const HeroSection = () => {
     toY: -50,
   });
 
-  const beat5 = getFinalBeatState(rawProgress, 0.85, 0.9, 50);
-  const endLogoShift = smoothstep(normalize(rawProgress, 0.82, 0.92));
-  const videoObjectPosition = `${50 + endLogoShift * 20}% center`;
-  const endVideoTranslateX = endLogoShift * 18;
-  const endVideoScale = 1 - endLogoShift * 0.08;
+  const beat5 = useFinalBeatMotion(scrollYProgress, 0.85, 0.9, 50);
+  const endLogoShift = useTransform(scrollYProgress, (value) =>
+    smoothstep(normalize(clamp01(value), 0.82, 0.92)),
+  );
+  const videoObjectPosition = useTransform(
+    endLogoShift,
+    (shift) => `${50 + shift * 30}% center`,
+  );
+  const endVideoScale = useTransform(endLogoShift, (shift) => 1 + shift * 0.12);
 
   return (
     <section ref={rootRef} className="relative h-[400vh]">
@@ -203,13 +229,14 @@ const HeroSection = () => {
         className="sticky top-0 h-screen overflow-hidden border-b-[3px] border-foreground"
         style={{ backgroundColor: "#111A2C" }}
       >
-        <video
+        <motion.video
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
           style={{
             objectPosition: videoObjectPosition,
-            transform: `translateX(${endVideoTranslateX}%) scale(${endVideoScale})`,
+            scale: endVideoScale,
             transformOrigin: "center center",
+            willChange: "transform",
           }}
           src="/optimized-hero.mp4"
           muted
