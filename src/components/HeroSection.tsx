@@ -118,7 +118,7 @@ const HeroSection = () => {
   const durationRef = useRef(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isLowPowerMode, setIsLowPowerMode] = useState(false);
-  const [videoSrc, setVideoSrc] = useState("/optimized-hero.mp4");
+  const [videoSrc, setVideoSrc] = useState("/optimized-hero-lite.mp4");
 
   const { scrollYProgress } = useScroll({
     target: rootRef,
@@ -127,19 +127,27 @@ const HeroSection = () => {
 
   useEffect(() => {
     const nav = navigator as NavigatorWithHints;
+    const cpuCores = nav.hardwareConcurrency ?? 8;
+    const memoryGb = nav.deviceMemory ?? 8;
+    const connectionType = nav.connection?.effectiveType;
+    const isSafari =
+      /^((?!chrome|android).)*safari/i.test(nav.userAgent) &&
+      !/crios|fxios|edgios/i.test(nav.userAgent);
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    const lowCpu =
-      typeof nav.hardwareConcurrency === "number" &&
-      nav.hardwareConcurrency <= 4;
-    const lowMemory =
-      typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4;
+    const lowCpu = cpuCores <= 8;
+    const lowMemory = memoryGb <= 8;
     const saveData = nav.connection?.saveData === true;
-    const slowNetwork = nav.connection?.effectiveType === "2g";
+    const slowNetwork = connectionType === "2g" || connectionType === "3g";
 
     const lowPower =
-      reducedMotion || lowCpu || lowMemory || saveData || slowNetwork;
+      reducedMotion ||
+      lowCpu ||
+      lowMemory ||
+      saveData ||
+      slowNetwork ||
+      isSafari;
     setIsLowPowerMode(lowPower);
     setVideoSrc(lowPower ? "/optimized-hero-lite.mp4" : "/optimized-hero.mp4");
 
@@ -151,7 +159,7 @@ const HeroSection = () => {
       if (Number.isFinite(videoRef.current.duration)) {
         durationRef.current = videoRef.current.duration;
       }
-      setVideoLoaded(videoRef.current.readyState >= 1);
+      setVideoLoaded(videoRef.current.readyState >= 2);
     };
 
     video.addEventListener("canplay", markLoaded);
@@ -172,6 +180,15 @@ const HeroSection = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    setVideoLoaded(false);
+    durationRef.current = 0;
+    video.load();
+  }, [videoSrc]);
+
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     const clamped = clamp01(value);
 
@@ -191,16 +208,16 @@ const HeroSection = () => {
       if (!video) return;
 
       const now = performance.now();
-      const minSeekIntervalMs = isLowPowerMode ? 55 : 28;
+      const minSeekIntervalMs = isLowPowerMode ? 110 : 72;
       if (now - lastSeekAtRef.current < minSeekIntervalMs) {
         return;
       }
 
-      const frameStep = isLowPowerMode ? 1 / 18 : 1 / 30;
+      const frameStep = isLowPowerMode ? 1 / 10 : 1 / 14;
       const quantizedTime =
         Math.round(targetTimeRef.current / frameStep) * frameStep;
 
-      if (Math.abs(video.currentTime - quantizedTime) > frameStep * 0.65) {
+      if (Math.abs(video.currentTime - quantizedTime) > frameStep * 0.9) {
         video.currentTime = quantizedTime;
         lastSeekAtRef.current = now;
       }
@@ -252,14 +269,6 @@ const HeroSection = () => {
   });
 
   const beat5 = useFinalBeatMotion(scrollYProgress, 0.85, 0.9, 50);
-  const endLogoShift = useTransform(scrollYProgress, (value) =>
-    isLowPowerMode ? 0 : smoothstep(normalize(clamp01(value), 0.82, 0.92)),
-  );
-  const videoObjectPosition = useTransform(
-    endLogoShift,
-    (shift) => `${50 + shift * 30}% center`,
-  );
-  const endVideoScale = useTransform(endLogoShift, (shift) => 1 + shift * 0.12);
 
   return (
     <section ref={rootRef} className="relative h-[400vh]">
@@ -271,18 +280,18 @@ const HeroSection = () => {
           ref={videoRef}
           className="absolute inset-0 h-full w-full object-cover"
           style={{
-            objectPosition: videoObjectPosition,
-            scale: endVideoScale,
-            transformOrigin: "center center",
+            objectPosition: "center center",
+            transform: "translateZ(0)",
             willChange: "transform",
           }}
           src={videoSrc}
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
+          poster="/logo_reference.png"
           disablePictureInPicture
           onError={() => {
-            if (videoSrc !== "/optimized-hero.mp4") {
+            if (videoSrc === "/optimized-hero-lite.mp4") {
               setVideoSrc("/optimized-hero.mp4");
             }
           }}
