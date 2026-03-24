@@ -312,7 +312,6 @@ const HeroSection = () => {
           muted
           playsInline
           preload="auto"
-          poster="/logo_reference.png"
           disablePictureInPicture
           onError={() => {
             if (videoSrc === "/optimized-hero-lite.mp4") {

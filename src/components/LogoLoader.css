@@ -36,7 +36,6 @@
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 8px hsl(var(--primary)));
   animation: trace 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
