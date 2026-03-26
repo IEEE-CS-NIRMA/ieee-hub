@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Mail, MapPin, Linkedin, Github } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
+import { ConfettiButton } from "@/components/ui/confetti";
 
 const socialLinks = [
   { label: "LinkedIn", icon: Linkedin, href: "#" },
@@ -10,10 +11,13 @@ const socialLinks = [
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const isFormFilled =
+    form.name.trim().length > 0 &&
+    form.email.trim().length > 0 &&
+    form.message.trim().length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Message sent! (Demo)");
     setForm({ name: "", email: "", message: "" });
   };
 
@@ -138,12 +142,19 @@ const Contact = () => {
                 />
               </div>
 
-              <button
+              <ConfettiButton
                 type="submit"
+                disabled={!isFormFilled}
+                options={{
+                  particleCount: 90,
+                  spread: 70,
+                  startVelocity: 35,
+                  ticks: 120,
+                }}
                 className="brutal-btn-primary w-full text-center"
               >
                 Send Message &rarr;
-              </button>
+              </ConfettiButton>
             </form>
           </div>
         </div>

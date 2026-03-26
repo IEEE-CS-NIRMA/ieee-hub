@@ -26,7 +26,7 @@ const sections = [
   {
     title: "Our Impact",
     content:
-      "Since our establishment, we've trained 500+ students, hosted 50+ events, collaborated with leading tech companies, and helped members secure positions at top organizations worldwide.",
+      "Since our establishment, we've trained 500+ students, hosted 1+ events, collaborated with leading tech companies, and helped members secure positions at top organizations worldwide.",
     accent: "bg-foreground text-background",
   },
   {

@@ -16,10 +16,10 @@ import {
 import { fallbackEvents, fetchPublishedEvents } from "@/lib/content/events";
 
 const stats = [
-  { icon: Users, label: "Members", value: "200+" },
-  { icon: Calendar, label: "Events Hosted", value: "50+" },
-  { icon: BookOpen, label: "Workshops", value: "30+" },
-  { icon: Trophy, label: "Competitions Won", value: "15+" },
+  { icon: Users, label: "Members", value: "20+" },
+  { icon: Calendar, label: "Events Hosted", value: "1+" },
+  { icon: BookOpen, label: "Workshops", value: "1+" },
+  { icon: Trophy, label: "Competitions Won", value: "1+" },
 ];
 
 const whyJoin = [
@@ -114,7 +114,7 @@ const Index = () => {
                 },
                 {
                   label: "Active Members",
-                  value: "200+",
+                  value: "20+",
                   color: "bg-secondary text-secondary-foreground",
                 },
               ].map((item, i) => (
