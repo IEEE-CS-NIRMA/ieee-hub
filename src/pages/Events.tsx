@@ -70,6 +70,18 @@ function getEmbeddableRegistrationUrl(url: string) {
   }
 }
 
+function isPastEventDate(eventDate: string) {
+  const parsedDate = new Date(eventDate);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return false;
+  }
+
+  const endOfEventDay = new Date(parsedDate);
+  endOfEventDay.setHours(23, 59, 59, 999);
+  return endOfEventDay.getTime() < Date.now();
+}
+
 const Events = () => {
   const [isSubmittingRegistration, setIsSubmittingRegistration] =
     useState(false);
@@ -200,6 +212,16 @@ const Events = () => {
     submitEvent.preventDefault();
 
     if (!activeRegistrationEvent) {
+      return;
+    }
+
+    const matchingEvent = events.find(
+      (event) => event.id === activeRegistrationEvent.id,
+    );
+
+    if (matchingEvent && isPastEventDate(matchingEvent.date)) {
+      toast.error("Registration for this event is closed.");
+      setActiveRegistrationEvent(null);
       return;
     }
 
@@ -338,114 +360,140 @@ const Events = () => {
             )}
 
             <AnimatePresence mode="popLayout">
-              {filtered.map((event, i) => (
-                <motion.div
-                  key={event.id}
-                  layout
-                  custom={i}
-                  variants={eventCardVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: false, amount: 0.2 }}
-                  exit={{ opacity: 0, scale: 0.85, y: -10 }}
-                  className="brutal-card flex flex-col"
-                  whileHover={{
-                    y: -6,
-                    boxShadow: "var(--shadow-brutal-hover)",
-                    transition: { type: "spring", stiffness: 150 },
-                  }}
-                >
-                  <motion.div
-                    className="flex items-center gap-3 mb-4"
-                    custom={i}
-                    variants={eventMetaVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: false, amount: 0.3 }}
-                  >
-                    <span
-                      className={`brutal-border px-3 py-1 font-heading font-bold text-xs uppercase ${categoryColors[event.category]}`}
-                    >
-                      {event.category}
-                    </span>
-                  </motion.div>
-                  <h3 className="text-xl font-heading font-extrabold mb-2">
-                    {event.title}
-                  </h3>
-                  <p className="font-heading font-semibold text-sm text-primary mb-2">
-                    {event.date}
-                  </p>
-                  <p className="font-body text-muted-foreground mb-6 flex-1">
-                    {event.desc}
-                  </p>
-                  <div className="mt-auto grid grid-cols-2 gap-3">
-                    {event.posterLink ? (
-                      <motion.button
-                        type="button"
-                        onClick={() =>
-                          setActivePoster({
-                            title: event.title,
-                            url: event.posterLink ?? "",
-                          })
-                        }
-                        className="brutal-border px-4 py-3 bg-background text-foreground font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center hover:bg-foreground hover:text-background transition-all"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        Poster
-                      </motion.button>
-                    ) : (
-                      <motion.button
-                        type="button"
-                        disabled
-                        className="brutal-border bg-background text-muted-foreground cursor-not-allowed px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center"
-                      >
-                        Poster Soon
-                      </motion.button>
-                    )}
+              {filtered.map((event, i) =>
+                (() => {
+                  const isPastEvent = isPastEventDate(event.date);
 
-                    {event.registrationMode === "internal" ? (
-                      <motion.button
-                        type="button"
-                        onClick={() =>
-                          setActiveRegistrationEvent({
-                            id: event.id,
-                            title: event.title,
-                          })
-                        }
-                        className="brutal-btn-primary px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                  return (
+                    <motion.div
+                      key={event.id}
+                      layout
+                      custom={i}
+                      variants={eventCardVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: false, amount: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.85, y: -10 }}
+                      className="brutal-card flex flex-col"
+                      whileHover={{
+                        y: -6,
+                        boxShadow: "var(--shadow-brutal-hover)",
+                        transition: { type: "spring", stiffness: 150 },
+                      }}
+                    >
+                      <motion.div
+                        className="flex items-center gap-3 mb-4"
+                        custom={i}
+                        variants={eventMetaVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: false, amount: 0.3 }}
                       >
-                        Register →
-                      </motion.button>
-                    ) : event.registrationLink ? (
-                      <motion.button
-                        type="button"
-                        onClick={() =>
-                          setActiveExternalRegistration({
-                            title: event.title,
-                            url: event.registrationLink ?? "",
-                          })
-                        }
-                        className="brutal-btn-primary px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        Register →
-                      </motion.button>
-                    ) : (
-                      <motion.button
-                        type="button"
-                        disabled
-                        className="brutal-border bg-background text-muted-foreground cursor-not-allowed px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center"
-                      >
-                        Registration Soon
-                      </motion.button>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
+                        <span
+                          className={`brutal-border px-3 py-1 font-heading font-bold text-xs uppercase ${categoryColors[event.category]}`}
+                        >
+                          {event.category}
+                        </span>
+                      </motion.div>
+                      <h3 className="text-xl font-heading font-extrabold mb-2">
+                        {event.title}
+                      </h3>
+                      <p className="font-heading font-semibold text-sm text-primary mb-2">
+                        {event.date}
+                      </p>
+                      <p className="font-body text-muted-foreground mb-6 flex-1">
+                        {event.desc}
+                      </p>
+                      <div className="mt-auto grid grid-cols-2 gap-3">
+                        {event.posterLink ? (
+                          <motion.button
+                            type="button"
+                            onClick={() =>
+                              setActivePoster({
+                                title: event.title,
+                                url: event.posterLink ?? "",
+                              })
+                            }
+                            className="brutal-border px-4 py-3 bg-background text-foreground font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center hover:bg-foreground hover:text-background transition-all"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            Poster
+                          </motion.button>
+                        ) : (
+                          <motion.button
+                            type="button"
+                            disabled
+                            className="brutal-border bg-background text-muted-foreground cursor-not-allowed px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center"
+                          >
+                            Poster Soon
+                          </motion.button>
+                        )}
+
+                        {event.registrationMode === "internal" ? (
+                          <motion.button
+                            type="button"
+                            onClick={
+                              isPastEvent
+                                ? undefined
+                                : () =>
+                                    setActiveRegistrationEvent({
+                                      id: event.id,
+                                      title: event.title,
+                                    })
+                            }
+                            disabled={isPastEvent}
+                            className={`px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center ${
+                              isPastEvent
+                                ? "brutal-border bg-background text-muted-foreground cursor-not-allowed"
+                                : "brutal-btn-primary"
+                            }`}
+                            whileHover={
+                              isPastEvent ? undefined : { scale: 1.02 }
+                            }
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            {isPastEvent ? "Registration Closed" : "Register →"}
+                          </motion.button>
+                        ) : event.registrationLink ? (
+                          <motion.button
+                            type="button"
+                            onClick={
+                              isPastEvent
+                                ? undefined
+                                : () =>
+                                    setActiveExternalRegistration({
+                                      title: event.title,
+                                      url: event.registrationLink ?? "",
+                                    })
+                            }
+                            disabled={isPastEvent}
+                            className={`px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center ${
+                              isPastEvent
+                                ? "brutal-border bg-background text-muted-foreground cursor-not-allowed"
+                                : "brutal-btn-primary"
+                            }`}
+                            whileHover={
+                              isPastEvent ? undefined : { scale: 1.02 }
+                            }
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            {isPastEvent ? "Registration Closed" : "Register →"}
+                          </motion.button>
+                        ) : (
+                          <motion.button
+                            type="button"
+                            disabled
+                            className="brutal-border bg-background text-muted-foreground cursor-not-allowed px-4 py-3 font-heading font-extrabold uppercase tracking-wide text-base md:text-lg inline-flex items-center justify-center text-center"
+                          >
+                            Registration Soon
+                          </motion.button>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })(),
+              )}
             </AnimatePresence>
           </motion.div>
         </div>
